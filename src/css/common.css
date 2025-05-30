@@ -1,0 +1,48 @@
+.gray-line{
+    background-color: #999;
+    width: 100%;
+    height: 1px;
+    margin: 0 auto;
+}
+.gray-line.per__90 {
+    width: 90%;
+}
+.gray-line.bolder {
+    height: 2px;
+}
+.pr{
+    position: relative;
+}
+.err{
+    color: #ff0c04;
+}
+.icon-sm {
+    font-size: 30px;
+    color: #fff;
+}
+.icon-m {
+    font-size: 35px;
+    color: #fff;
+}
+.ft__7{
+    font-size: 0.7rem;
+}
+.ft__8{
+    font-size: 0.8rem;
+}
+.ft__9{
+    font-size: 0.9rem;
+}
+.ft__10{
+    font-size: 1.0rem;
+}
+.ft__11{
+    font-size: 1.1rem;
+}
+.ft__12{
+    font-size: 1.2rem;
+}
+
+.underline{
+    text-decoration: underline;
+}
