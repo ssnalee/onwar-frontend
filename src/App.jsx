@@ -3,8 +3,8 @@ import { Route, Routes } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
 import { lightTheme, darkTheme } from './utils/theme';
-import './css/reset.css';
-import './css/common.css';
+import './assets/css/reset.css';
+import './assets/css/common.css';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import Aside from './components/Aside';
@@ -12,6 +12,7 @@ import Home from './routes/Home';
 import Login from './routes/Login';
 import Signup from './routes/Signup';
 import SearchUser from './routes/SearchUser';
+import BattleTags from './routes/BattleTags';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -19,6 +20,7 @@ const GlobalStyle = createGlobalStyle`
     background-color: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
     font-family: sans-serif;
+    font-family: "Do Hyeon", sans-serif;
   }
   .main-wrapper{
     padding: 80px 50px 150px 250px!important;
@@ -36,6 +38,7 @@ const GlobalStyle = createGlobalStyle`
     padding: 10px;
     border-radius: 5px;
     color : ${props=> props.theme.colors.txt};
+    font-family: "Noto Sans KR", sans-serif;
   }
 `;
 
@@ -55,6 +58,7 @@ function App() {
             <Route path="/login" element={<Login />}></Route>
             <Route path="/sign-up" element={<Signup />}></Route>
             <Route path="/search" element={<SearchUser />}></Route>
+            <Route path="/battletag" element={<BattleTags />}></Route>
           </Routes>
           </div>
 

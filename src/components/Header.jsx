@@ -15,6 +15,11 @@ const Head = styled.header`
   padding: 20px 50px;
   height: 70px;
   background-color: ${props => props.theme.colors.primary};
+  h1{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 `;
 const Nav = styled.nav`
    a,button{
@@ -37,7 +42,9 @@ export default function Header() {
     }, [userInfo]);
     return (
         <Head>
-            <h1>ON WAR</h1>
+            <h1>
+                <img src="/images/heros/default.svg" />
+                ON WAR</h1>
             <Nav>
                 {userInfo ? (
                     <button onClick={handleLogout}>로그아웃</button>

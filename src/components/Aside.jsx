@@ -29,12 +29,19 @@ export default function Aside() {
     return (
         <Side>
             <Nav>
-                <p>영웅</p>
+                <p>HEROS</p>
                 <div className="gray-line"></div>
-                <Link to="/login">영웅 갤거리</Link>
-                <Link to="/sign-up">소식</Link>
+                <Link to="/news">최신 패치노트</Link>
+                <Link to="/gallery">영웅 갤러리</Link>
+                <p>BATTLETAGS</p>
+                <div className="gray-line"></div>
                 <Link to="/search">배틀태그 검색</Link>
-                <Link to="/search">내 배틀태그 관리</Link>
+                <Link to="/battletag">내 배틀태그 관리</Link>
+                <p>COMMUNITY</p>
+                <div className="gray-line"></div>
+                <Link to="/competitive">경쟁전 파티 구함</Link>
+                <Link to="/quick-play">빠른대전 파티 구함</Link>
+                <Link to="/promote">홍보 채널</Link>
             </Nav>
         </Side>
 

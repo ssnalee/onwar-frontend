@@ -12,6 +12,12 @@ export const lightTheme = {
     md: '16px',
     lg: '20px',
   },
+  fontFamily : {
+    main :  "Do Hyeon",
+    sub : "Noto Sans KR",
+    sub2 : "Gowun Batang",
+    sub3 : "Jua",
+  }
 };
 
 export const darkTheme = {
@@ -28,4 +34,9 @@ export const darkTheme = {
     md: '16px',
     lg: '20px',
   },
+  fontFamily : {
+    main :  "Do Hyeon",
+    sub : "Noto Sans KR",
+    sub2 : "Gowun Batang",
+  }
 };

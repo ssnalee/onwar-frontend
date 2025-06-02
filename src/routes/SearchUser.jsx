@@ -5,12 +5,16 @@ import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FiCheck } from "react-icons/fi";
 import { FaSearch } from "react-icons/fa";
 import styled from "styled-components";
+import { heros } from "../utils/heros";
+import { useSearchParams } from "react-router-dom";
 const SearchTitle = styled.h3`
    margin: 50px 0;
    display: flex;
    align-items: center;
    gap: 5px;
-   font-size: 20px;
+   font-size: 40px;
+   color:#616161;
+   /* font-weight: 400; */
 `;
 const SearchWrap = styled.div`
    display: flex;
@@ -111,6 +115,12 @@ width: 100%;
             border-right: none;
         }
     }
+    .no-tier{
+        height: 108px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
   }
   .pos{
     width: 100%;
@@ -136,6 +146,7 @@ width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 10px 0;
     .rank-ico{
         width: 70px;
         /* position: absolute;
@@ -153,6 +164,13 @@ width: 100%;
     }
   }
 `;
+const Nodata = styled.p`
+  margin: 20% 0;
+  text-align: center;
+  span{
+    position: relative;
+  }
+`;
 
 const HeroWrap = styled.div`
   h5{
@@ -166,15 +184,28 @@ const HeroWrap = styled.div`
         padding: 5px;
         font-size: 0.8rem;
         border-radius: 20px;
+        font-family:  ${({ theme }) => theme.fontFamily.sub2}, sans-serif;
+        font-weight: 600;
     }
   }
 `;
 const Competition = styled.div`
   display: flex;
   align-items: center;
-  
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
   >p{
     width: 150px;
+  }
+`;
+const Character = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  img{
+    width: 80px;
+    border-radius: 50%;
   }
 `;
 const StatList = styled.ul`
@@ -183,22 +214,28 @@ display: flex;
 align-items: center;
 justify-content: space-between;
 gap: 5px;
-margin-bottom: 20px;
+li{
+    background-color: ${props => props.heroColor};
+    border-radius: 5px;
+    overflow: hidden;
+    font-family: ${({ theme }) => theme.fontFamily.sub2}, sans-serif;
+}
 `;
 const StatItem = styled.li`
   width: 100%;
   p{
     width: 100%;
     text-align: center;
+    padding: 12px 0 !important;
   }
   p:first-child{
     padding: 5px;
-    background-color: #0081c7;
-    color :#fff;
+    color :#fff; 
   }
   p:last-child{
     padding: 5px;
     background-color: #fff;
+    font-weight: 600;
   }
   box-shadow: 3px 5px 5px rgba(0,0,0,0.1);
 `;
@@ -206,11 +243,14 @@ const StatItem = styled.li`
 export default function SearchUser() {
     const platforms = ['pc', 'etc'];
     const regions = ['us', 'eu', 'asia'];
+    const positions = ['tank', 'offense', 'support', 'open'];
+    const [searchParams] = useSearchParams();
     const [isDropdown, setIsDropdown] = useState(false);
     const [isDropdown2, setIsDropdown2] = useState(false);
     const [platform, setPlatform] = useState("pc");
     const [region, setRegion] = useState("asia");
     const [battletag, setBattletag] = useState("mercy76#3111");
+    const [searchTag, setSearchTag] = useState("");
     const { data, error, isLoading, refetch } = useQuery({
         queryKey: ['battletag', battletag],
         queryFn: () => getProfile({ platform, region, battletag })
@@ -223,16 +263,37 @@ export default function SearchUser() {
         setRegion(item);
         setIsDropdown2(false);
     }
+    const handleSearch = () => {
+        if (searchTag) {
+            setBattletag(searchTag);
+        }
+
+        // refetch();
+        console.log('data', data);
+    }
+    const setHeros = (name) => {
+        return heros[name]?.label || name;
+    }
     useEffect(() => {
         refetch();
         console.log('data', data);
     }, [])
+    useEffect(() => {
+        const tag = searchParams.get("battletag");
+        if (tag) {
+            setBattletag(tag);
+        }
+    }, [searchParams]);
     return (
         <>
             <SearchTitle><FaSearch />배틀태그 검색</SearchTitle>
             <SearchWrap>
-                <input type="text" placeholder="배틀태그 예) 홍길동#1234" />
-                <button>검색</button>
+                <input type="text" placeholder="배틀태그 예) 홍길동#1234" value={searchTag} onChange={(e) => setSearchTag(e.target.value)} onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        handleSearch();
+                    }
+                }} />
+                <button onClick={handleSearch}>검색</button>
                 <div>
                     <p onClick={() => setIsDropdown(!isDropdown)}>{platform.toUpperCase()}
                         {isDropdown ? <IoIosArrowUp /> : <IoIosArrowDown />}
@@ -240,7 +301,7 @@ export default function SearchUser() {
                     {isDropdown ? <DropDown className="dropdown">
                         <ul>
                             {platforms.map((item) => (
-                                <li onClick={() => selectedPlatform(item)}>
+                                <li key={item} onClick={() => selectedPlatform(item)}>
                                     {item.toUpperCase()} {platform === item && <FiCheck />}
                                 </li>
                             ))}
@@ -254,7 +315,7 @@ export default function SearchUser() {
                     {isDropdown2 ? <DropDown className="dropdown">
                         <ul>
                             {regions.map((item) => (
-                                <li onClick={() => selectedRegion(item)}>
+                                <li key={item} onClick={() => selectedRegion(item)}>
                                     {item.toUpperCase()} {region === item && <FiCheck />}
                                 </li>
                             ))}
@@ -262,70 +323,92 @@ export default function SearchUser() {
                     </DropDown> : null}
                 </div>
             </SearchWrap>
-            <BattleTagWrap>
-                <div className="player-wrap">
-                    <img className="player-ico" src={data?.icon} />
-                    <p>{data?.name}</p>
-                </div>
-                <TierWrap className="tier-wrap">
-                    {
-                        data?.ratings.map((v, idx) => (
-                            <div key={idx}>
-                                <div className="pos">
-                                    <img className="pos-ico" src={v.roleIcon} alt={v.role} />
-                                </div>
-                                <div className="tier">
-                                    <div className="img-wrap">
-                                        <img className={`${v.group} rank-ico`} src={v.rankIcon} />
-                                        <img className="div-ico" src={v.divisionIcon} alt={`${v.group} ${v.tier}`} />
-                                    </div>
-                                    {/* <p> 랭크 {v.group} {v.tier}</p> */}
-                                </div>
-                            </div>
-                        ))
-                    }
-                </TierWrap>
-            </BattleTagWrap>
-            <HeroWrap>
-                <h5>경쟁전 영웅별 스탯 <span>{data?.competitiveStats?.season}시즌</span> </h5>
-                {Object.entries(data?.competitiveStats?.careerStats
-                ).map(([heroName, heroData]) => (
-                    <Competition key={heroName}>
-                        <p>{heroName}</p>
-                        <StatList>
-                            <StatItem>
-                                <p>플레이 시간</p>
-                                <p>{heroData?.game?.timePlayed}</p>
-                            </StatItem>
-                            <StatItem>
-                                <p>승 / 패 (승률)</p>
-                                <p>{heroData?.game?.gamesWon} / {heroData?.game?.gamesLost} ({heroData?.game?.winPercentage})</p>
-                            </StatItem>
-                            <StatItem>
-                                <p>10분당 목처</p>
-                                <p>{heroData?.average?.deathsAvgPer10Min}</p>
-                            </StatItem>
-                            <StatItem>
-                                <p>10분당 데미지</p>
-                                <p>{heroData?.average?.heroDamageDoneAvgPer10Min}</p>
-                            </StatItem>
-                            <StatItem>
-                                <p>10분당 힐량</p>
-                                <p>{heroData?.average?.healingDoneAvgPer10Min}</p>
-                            </StatItem>
+            {!isLoading && data ?
+                <>
+                    <BattleTagWrap>
+                        <div className="player-wrap">
+                            <img className="player-ico" src={data?.icon} />
+                            <p>{data?.name}</p>
+                        </div>
+                        <TierWrap className="tier-wrap">
+                            {
+                                positions.map((v, idx) => {
+                                    const matchedRating = data?.ratings.find(rating => rating.role === v);
+                                    return (
+                                        <div key={idx}>
+                                            <div className="pos">
+                                                <img className="pos-ico" src={`/images/comn/${v}.svg`} alt={v} />
+                                            </div>
+                                            <div className="tier">
+                                                {matchedRating ?
+                                                    <div className="img-wrap">
+                                                        <img className={`${matchedRating?.group} rank-ico`} src={matchedRating?.rankIcon} />
+                                                        <img className="div-ico" src={matchedRating?.divisionIcon} alt={`${matchedRating?.group} ${matchedRating?.tier}`} />
+                                                    </div> :
+                                                    <div className="no-tier">-</div>
+                                                }
 
-                        </StatList>
+                                            </div>
+                                        </div>
+                                    )
+                                })
+                            }
+                        </TierWrap>
+                    </BattleTagWrap>
+                    <HeroWrap>
+                        {/* <img src="/images/heros/default.svg" /> */}
+                        <h5>경쟁전 영웅별 스탯 <span>{data?.competitiveStats?.season}시즌</span> </h5>
+                        {data?.competitiveStats?.careerStats && Object.entries(data?.competitiveStats?.careerStats
+                        ).slice(1).map(([heroName, heroData]) => (
+                            <Competition key={heroName}>
+                                <Character>
+                                    <img src={`/images/heros/${heroName}.png`}
+                                        onError={(e) => {
+                                            e.currentTarget.onerror = null;
+                                            e.currentTarget.src = `/images/heros/default.png`;
+                                        }}
+                                        alt={heroName}
+                                    />
+                                    {/* <p>{setHeros(heroName)}</p> */}
+                                </Character>
+                                <StatList heroColor={heros[heroName]?.color || '#555'}>
+                                    <StatItem>
+                                        <p>플레이 시간</p>
+                                        <p>{heroData?.game?.timePlayed || "-"}</p>
+                                    </StatItem>
+                                    <StatItem>
+                                        <p>승 / 패 (승률)</p>
+                                        <p>{heroData?.game?.gamesWon || "0"} / {heroData?.game?.gamesLost || "0"} ({heroData?.game?.winPercentage || "-"})</p>
+                                    </StatItem>
+                                    <StatItem>
+                                        <p>10분당 목처</p>
+                                        <p>{heroData?.average?.deathsAvgPer10Min || "-"}</p>
+                                    </StatItem>
+                                    <StatItem>
+                                        <p>10분당 데미지</p>
+                                        <p>{heroData?.average?.heroDamageDoneAvgPer10Min || "-"}</p>
+                                    </StatItem>
+                                    <StatItem>
+                                        <p>10분당 힐량</p>
+                                        <p>{heroData?.average?.healingDoneAvgPer10Min || "-"}</p>
+                                    </StatItem>
 
-                    </Competition>
-                ))}
-                <div>
-                    {/* <p>{data?.competitiveStats?.topHeroes[0]}</p>
-                    <div>
-                        <p>플레이 시간</p>
-                        <p></p>
-                    </div> */}
-                </div>
-            </HeroWrap>
+                                </StatList>
+
+                            </Competition>
+                        ))}
+                    </HeroWrap>
+                </> :
+                isLoading ?
+                    <>
+                        <Nodata>로딩 중입니다<span></span></Nodata>
+                    </>
+                    :
+                    <>
+                        <Nodata>데이터가 없습니다.</Nodata>
+                    </>
+            }
+
         </>
     );
 }
