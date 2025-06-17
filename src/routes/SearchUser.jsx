@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProfile } from "../api/api";
+import { getProfile } from "../api/apiOw";
 import { useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FiCheck } from "react-icons/fi";
@@ -104,6 +104,10 @@ width: 100%;
     border-left: 1px solid #000;
     border-right: 1px solid #000;
     /* border-bottom: 2px solid #000; */
+    height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     }
     &:nth-child(1){
         .tier{
@@ -114,12 +118,6 @@ width: 100%;
         .tier{
             border-right: none;
         }
-    }
-    .no-tier{
-        height: 108px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
   }
   .pos{
@@ -405,7 +403,10 @@ export default function SearchUser() {
                     </>
                     :
                     <>
-                        <Nodata>데이터가 없습니다.</Nodata>
+                        <Nodata>
+                            <p>데이터가 없습니다.</p>
+                            <p>플레이어 이름의 대소문자와 배틀태그를 정확히 입력해야 합니다.</p>
+                        </Nodata>
                     </>
             }
 

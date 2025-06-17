@@ -33,10 +33,11 @@ export default function Header() {
     const dispatch = useDispatch();
     const userInfo = useSelector((state) => state.user.userInfo);
     const handleLogout = () => {
-        dispatch(setUserInfo(null));
+        dispatch(setUserInfo(""));
+        localStorage.clear();
     }
     useEffect(() => {
-        if (userInfo === null) {
+        if (userInfo === "") {
             navigate('/login');
         }
     }, [userInfo]);

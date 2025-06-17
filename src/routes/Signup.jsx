@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { MdOutlinePermIdentity } from "react-icons/md";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { signUpUser, verifyUserId } from "../api/apiUser";
 const SignWrap = styled.div`
   position: relative;
   width: 100%;
@@ -21,18 +23,22 @@ const SignArea = styled.div`
   top: 50%;
   transform: translate(-50%,-50%);
   gap: 20px;
-  background-color: ${props=> props.theme.colors.primary};
+  background-color: ${props => props.theme.colors.primary};
   padding: 70px 50px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   .confirm-btn{
     background-color: #fff;
-    padding: 7px;
+    padding: 10px 7px;
     border-radius: 5px;
+    width: 50px;
     &:hover{
         background-color: #000;
         color: #fff;
     }
+  }
+  .err-msg{
+    color:#e70000;
   }
 `;
 const SignInput = styled.div`
@@ -53,49 +59,83 @@ const SignBtn = styled.button`
 `;
 export default function Signup() {
     const navigate = useNavigate();
-    const [err,setErr] = useState(null);
-    const [userId, setUserId]    = useState("");
-    const [userPw, setUserPw]    = useState("");
-    const [userPw2, setUserPw2]  = useState("");
+    const [err, setErr] = useState(null);
+    const [userId, setUserId] = useState("");
+    const [userPw, setUserPw] = useState("");
+    const [userPw2, setUserPw2] = useState("");
     const [verifyId, setVerifyId] = useState(false);
-    const handleVerifyId = () => {
-        // 아이디 중복체크 후 아이디 입력막기
-        setVerifyId(true);
-    }  
-    const handleSignup = () => {
-        console.log('vv',verifyId)
-        console.log('vv',userPw)
-        console.log('vv',userPw2)
-        if(!verifyId) return;
-        if(!userPw || !userPw2 || userPw !== userPw2){
-            return;
-        }
-        const userData = {
-            userId,
-            userPw,
-            userPw2
-        };
-        //회원가입 api 연결
-        navigate('/login');
-    }
+    const signUpMutation = useMutation({
+        mutationFn : signUpUser,
+        onSuccess: (data) => {
+            console.log('data',data);
+            if (data.error) {
+                setErr(data.msg || "회원가입 실패");
+                return;
+            } 
+            navigate('/login');
+            
+        },
+        onError: (err) => {
+            setErr(err?.response?.data?.msg || "서버 통신 실패");
+        },
+    });
+    const checkIdMutation = useMutation({
+        mutationFn : verifyUserId,
+        onSuccess: (data) => {
+            if (data.error) {
+                setErr(data.msg);
+                return;
+            } 
+            const isExist = data.data?.isExist;
+            if(isExist){
+                setErr("중복된 아이디입니다.");
+                setVerifyId(false);
+            }else{
+                setErr(null);
+                setVerifyId(true);
+            }
+        },
+        onError: (err) => {
+            setErr(err?.response?.data?.msg || "서버 통신 실패");
+        },
+    });
 
-    return(
+
+    const handleVerifyId = () => {
+        checkIdMutation.mutate(userId);
+    };
+
+    const handleSignup = () => {
+        if (!verifyId) return;
+        if (!userPw || !userPw2 || userPw !== userPw2) return;
+
+        const userData = {
+            username: userId,
+            password: userPw,
+            confirm_password: userPw2,
+        };
+
+        signUpMutation.mutate(userData);
+    };
+
+    return (
         <SignWrap>
             <SignArea>
                 <SignTitle>회원가입</SignTitle>
                 <SignInput>
                     <label htmlFor="userId"><MdOutlinePermIdentity className="icon-sm" /></label>
-                    <input type="text" id="userId" placeholder="아이디" disabled={verifyId} value={userId} onChange={e=>setUserId(e.target.value)} />
+                    <input type="text" id="userId" placeholder="아이디" disabled={verifyId} value={userId} onChange={e => setUserId(e.target.value)} />
                     <button className="confirm-btn" onClick={handleVerifyId} disabled={verifyId}>확인</button>
                 </SignInput>
                 <SignInput>
                     <label htmlFor="userPw"><MdOutlinePermIdentity className="icon-sm" /></label>
-                    <input type="password" id="userPw" placeholder="비밀번호" value={userPw}  onChange={e=>setUserPw(e.target.value)}/>
+                    <input type="password" id="userPw" placeholder="비밀번호" value={userPw} onChange={e => setUserPw(e.target.value)} />
                 </SignInput>
                 <SignInput>
                     <label htmlFor="userPw2"><MdOutlinePermIdentity className="icon-sm" /></label>
-                    <input type="password" id="userPw2" placeholder="비밀번호 확인" value={userPw2} onChange={e=>setUserPw2(e.target.value)} />
+                    <input type="password" id="userPw2" placeholder="비밀번호 확인" value={userPw2} onChange={e => setUserPw2(e.target.value)} />
                 </SignInput>
+                <p class="err-msg">{err}</p>
                 <SignInput>
                     <SignBtn onClick={handleSignup}>계정 만들기</SignBtn>
                 </SignInput>
@@ -103,5 +143,5 @@ export default function Signup() {
             </SignArea>
         </SignWrap>
     )
-      
+
 }

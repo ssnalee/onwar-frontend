@@ -3,8 +3,10 @@ import styled from "styled-components";
 import { MdOutlinePermIdentity } from "react-icons/md";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setUserInfo } from "../store/userSlice";
+import { useMutation } from "@tanstack/react-query";
+import { loginUser } from "../api/apiUser";
 const LoginWrap = styled.div`
   position: relative;
   width: 100%;
@@ -52,26 +54,45 @@ const LoginBtn = styled.button`
 export default function Login() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const userInfo = useSelector((state) => state.user.userInfo);
     const [err,setErr] = useState(null);
     const [userId, setUserId]  = useState("");
     const [userPw, setUserPw]  = useState("");
+    const mutation = useMutation({
+        mutationFn: loginUser,
+        onSuccess : (data) => {
+            console.log('data',data);
+            if (data.error) {
+                setErr(data.msg || "로그인 실패");
+                return;
+            }
+            const userInfo = data?.data;
+            localStorage.setItem("authToken",data?.data?.accessToken);
+            localStorage.setItem("userInfo", JSON.stringify(data?.data));
+            dispatch(setUserInfo(userInfo));
+            navigate('/');
+        },
+        onError : (err) => {
+            console.log('err',err);
+            setErr(err?.response?.data?.msg || "서버 통신 실패");
+        },
+    });
     useEffect(()=>{
-        console.log('userInfo',userInfo);
-        if(userInfo){
+        const token = localStorage.getItem("authToken");
+        if(token){
             navigate('/');
         }
-    },[userInfo]);
+    },[]);
     const handleLogin = () =>{
         if(!userId || !userPw){
             setErr("입력해");
            return; 
         }
         const userData = {
-            userId : userId,
-            userPw : userPw
+            username : userId,
+            password : userPw
         }
-        dispatch(setUserInfo(userData));
+        mutation.mutate(userData);
+        // dispatch(setUserInfo(userData));
     }
     return (
         <LoginWrap>
@@ -93,8 +114,7 @@ export default function Login() {
                 </LoginInput>
                 <Link to="/sign-up" className="ft__7">아직 계정이 없으신가요? <span className="underline">회원가입</span></Link>
             </LoginArea>
-            {userInfo?.userId}
-            {userInfo?.userPw}
+
         </LoginWrap>
     );
 }

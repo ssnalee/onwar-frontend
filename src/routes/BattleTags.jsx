@@ -30,7 +30,7 @@ const BattleTagList = styled.div`
     border: 2px solid  ${({ theme }) => theme.colors.txt};
     margin-top: 50px;
     padding: 50px;
-    >p{
+    >h5{
         color:#fff;
         font-size: 25px;
         border-bottom: 3px solid ${({ theme }) => theme.colors.txt_reverse};
@@ -89,7 +89,7 @@ export default function BattleTags() {
             </SaveWrap>
 
             <BattleTagList>
-                <p>#배틀태그 리스트</p>
+                <h5>#배틀태그 리스트</h5>
                 {
                     tagList.length > 0 ?
                         <ul className="tag-list">

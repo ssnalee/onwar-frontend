@@ -2,7 +2,7 @@
 import { Route, Routes } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
-import { lightTheme, darkTheme } from './utils/theme';
+import { theme } from './utils/theme';
 import './assets/css/reset.css';
 import './assets/css/common.css';
 import Footer from './components/Footer';
@@ -13,6 +13,10 @@ import Login from './routes/Login';
 import Signup from './routes/Signup';
 import SearchUser from './routes/SearchUser';
 import BattleTags from './routes/BattleTags';
+import Competitive from './routes/board/BoardCompetitive';
+import QuickPlay from './routes/board/BoardQuickPlay';
+import { setUserInfo } from './store/userSlice';
+import { useEffect } from 'react';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -20,7 +24,7 @@ const GlobalStyle = createGlobalStyle`
     background-color: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
     font-family: sans-serif;
-    font-family: "Do Hyeon", sans-serif;
+    font-family: ${({ theme }) => theme.fontFamily.main}, sans-serif;
   }
   .main-wrapper{
     padding: 80px 50px 150px 250px!important;
@@ -34,32 +38,44 @@ const GlobalStyle = createGlobalStyle`
     margin: 0 auto;
   }
   input{
-    /* border: 1px solid  ${props=> props.theme.colors.deep_gray}; */
+    /* border: 1px solid  ${props => props.theme.colors.deep_gray}; */
     padding: 10px;
     border-radius: 5px;
-    color : ${props=> props.theme.colors.txt};
+    color : ${props => props.theme.colors.txt};
     font-family: "Noto Sans KR", sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6{
+    font-family: ${({ theme }) => theme.fontFamily.title}, sans-serif;
   }
 `;
 
 function App() {
-  const isDarkMode = useSelector((state) => state.theme.isDarkMode);
   const dispatch = useDispatch();
+  const token = localStorage.getItem("authToken");
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  useEffect(() => {
+    if (token && userInfo) {
+      dispatch(setUserInfo(userInfo));
+    }
+  }, []);
+
   return (
-    <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+    <ThemeProvider theme={theme}>
       <GlobalStyle />
       <div className='pr'>
         <Header />
         <Aside />
         <div className='main-wrapper'>
           <div className='content-wrapper'>
-          <Routes>
-            <Route path="/" element={<Home />}></Route>
-            <Route path="/login" element={<Login />}></Route>
-            <Route path="/sign-up" element={<Signup />}></Route>
-            <Route path="/search" element={<SearchUser />}></Route>
-            <Route path="/battletag" element={<BattleTags />}></Route>
-          </Routes>
+            <Routes>
+              <Route path="/" element={<Home />}></Route>
+              <Route path="/login" element={<Login />}></Route>
+              <Route path="/sign-up" element={<Signup />}></Route>
+              <Route path="/search" element={<SearchUser />}></Route>
+              <Route path="/battletag" element={<BattleTags />}></Route>
+              <Route path="/board/competitive" element={<Competitive />}></Route>
+              <Route path="/board/quick-play" element={<QuickPlay />}></Route>
+            </Routes>
           </div>
 
         </div>

@@ -39,8 +39,8 @@ export default function Aside() {
                 <Link to="/battletag">내 배틀태그 관리</Link>
                 <p>COMMUNITY</p>
                 <div className="gray-line"></div>
-                <Link to="/competitive">경쟁전 파티 구함</Link>
-                <Link to="/quick-play">빠른대전 파티 구함</Link>
+                <Link to="/board/competitive">경쟁전 파티 구함</Link>
+                <Link to="/board/quick-play">빠른대전 파티 구함</Link>
                 <Link to="/promote">홍보 채널</Link>
             </Nav>
         </Side>
