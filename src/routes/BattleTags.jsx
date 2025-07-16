@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { TiDelete } from "react-icons/ti";
+import { FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getBattletagList, patchBattletag, postBattletag } from "../api/apiTag";
+import { deleteBattletag } from './../api/apiTag';
+import ModalFrame from "../components/modal/modalFrame";
 const Title = styled.h3`
    margin: 50px 0;
    display: flex;
@@ -64,18 +69,128 @@ const BattleTagList = styled.div`
         font-family: ${({ theme }) => theme.fontFamily.sub2}, sans-serif;
     }
 `;
+
+
+const ModalTitle = styled.div`
+  padding: 16px 20px 0;
+  font-weight: bold;
+  h4 {
+    margin: 0;
+    font-size: 18px;
+    /* text-align: center; */
+    /* color:#fff; */
+    font-family: ${({ theme }) => theme.fontFamily.main}, sans-serif;
+  }
+`;
+
+const ModalBody = styled.div`
+  padding: 20px;
+  font-size: 15px;
+  line-height: 1.5;
+  /* text-align: center; */
+`;
+
+const ModalButtonWrap = styled.div`
+  padding: 0 20px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+
+  button {
+    padding: 8px 14px;
+    font-size: 14px;
+    background: #222;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:last-child {
+      background: #aaa;
+    }
+  }
+`;
+
 export default function BattleTags() {
     const navigate = useNavigate();
-    const tagList = ["mercy76#3111","SSna#3389"]; 
-    // const tagList = [];
+    const queryClient = useQueryClient();
+    const [err, setErr] = useState(null);
+    const [editingId, setEditingId] = useState(null);
+    const [editInput, setEditInput] = useState(null);
+    const { data: tagList, isLoading, error } = useQuery({
+        queryKey: ['tagList'],
+        queryFn: () => getBattletagList()
+    });
     const [battletag, setBattletag] = useState("");
+    const saveMutation = useMutation({
+        mutationFn: postBattletag,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries(['tagList']);
+            if (data.error) {
+                setErr(data.msg || "배틀태그 저장 중 오류가 발생했습니다.");
+                return;
+            }
+            setBattletag('');
+            setErr(null);
+        },
+        onError: (err) => {
+            setErr(err?.response?.data?.msg || "서버 통신 실패");
+        },
+    });
+    const updateMutation = useMutation({
+        mutationFn: patchBattletag,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries(['tagList']);
+            if (data.error) {
+                setErr(data.msg || "배틀태그 업데이트 중 오류가 발생했습니다.");
+                return;
+            }
+            setBattletag('');
+            setErr(null);
+        },
+        onError: (err) => {
+            setErr(err?.response?.data?.msg || "서버 통신 실패");
+        },
+    });
+    const deleteMutation = useMutation({
+        mutationFn: deleteBattletag,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries(['tagList']);
+            if (data.error) {
+                setErr(data.msg || "배틀태그 삭제 중 오류가 발생했습니다.");
+                return;
+            }
+            setBattletag('');
+            setErr(null);
+        },
+        onError: (err) => {
+            setErr(err?.response?.data?.msg || "서버 통신 실패");
+        },
+    });
     const handleSave = () => {
-        localStorage.setItem("battletag", battletag);
+        if (!battletag.trim()) {
+            setErr('배틀태그를 입력해주세요.');
+            return;
+        }
+        saveMutation.mutate(battletag);
     }
-    const handleDelete = () => {};
+    const handleClickEdit = (v) => {
+        setEditingId(v.id);
+        setEditInput(v.battletag);
+    }
+    const handleDeleteTag = (id) => {
+        deleteMutation.mutate(id);
+    };
     const handleSearchTag = (item) => {
         navigate(`/search?battletag=${encodeURIComponent(item)}`);
     };
+    const closeHandler = (key) => {
+        if (key === 1 && editingId) {
+            updateMutation.mutate({ id: editingId, tag: editInput });
+        }
+        setEditingId(null);
+    };
+
     return (
         <>
             <Title>내 배틀태그 관리</Title>
@@ -87,25 +202,52 @@ export default function BattleTags() {
                 }} />
                 <button onClick={handleSave}>추가</button>
             </SaveWrap>
-
             <BattleTagList>
                 <h5>#배틀태그 리스트</h5>
                 {
-                    tagList.length > 0 ?
-                        <ul className="tag-list">
-                            {tagList.map((v) => (
-                                <li key={v}>
-                                    <p onClick={()=>handleSearchTag(v)}>{v}</p>
-                                    <button><TiDelete fontSize="25px" color="#ff0000"/></button>
-                                </li>
-                            ))}
-                        </ul> :
-                        <span>*배틀태그를 추가하면 더욱 쉽게 관리할 수 있어요.</span>
+                    isLoading ? (<>Loading ...</>) :
+                        error || tagList?.error ?
+                            (<p>{tagList?.msg || '리스트를 불러오는데 오류가 발생하였습니다.'}</p>) :
+                            tagList?.data?.length > 0 ?
+                                (<ul className="tag-list">
+                                    {tagList?.data?.map((v) => (
+                                        <li key={v.battletag}>
+                                            <p onClick={() => handleSearchTag(v.battletag)}>{v.battletag}</p>
+                                            <button onClick={() => handleClickEdit(v)}><FaEdit fontSize="25px" color="#000" /></button>
+                                            <button onClick={() => handleDeleteTag(v.id)}><TiDelete fontSize="25px" color="#ff0000" /></button>
+                                        </li>
+                                    ))}
+                                </ul>) :
+                                (<span>*배틀태그를 추가하면 더욱 쉽게 관리할 수 있어요.</span>)
                 }
-                 <span>*배틀태그를 클릭하면 검색페이지로 이동합니다!!</span>
-                 <span>(PLATFORM - PC , REGION - ASIA 를 기준으로 합니다.)</span>
+                <span>*배틀태그를 클릭하면 검색페이지로 이동합니다!!</span>
+                <span>(PLATFORM - PC , REGION - ASIA 를 기준으로 합니다.)</span>
             </BattleTagList>
+            {
+                editingId !== null ?
+                    <ModalFrame
+                        isVisible={editingId}
+                        // width={width}
+                        // height={height}
+                        // maxWidth={maxWidth}
+                        isOverlay={true}
+                        onCloseDialogHandler={() => closeHandler(0)}
+                    >
+                        <ModalTitle>
+                            <h4>배틀태그 수정</h4>
+                        </ModalTitle>
 
+                        <ModalBody>
+                            <input type="text" value={editInput} onChange={(e) => { setEditInput(e.target.value) }} />
+                        </ModalBody>
+
+                        <ModalButtonWrap>
+                            <button onClick={() => closeHandler(1)}>확인</button>
+                            <button onClick={() => closeHandler(0)}>취소</button>
+                        </ModalButtonWrap>
+                    </ModalFrame>
+                    : null
+            }
         </>
     )
 }

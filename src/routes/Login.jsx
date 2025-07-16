@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import AlertModal from '../components/modal/modalAlert';
 import { MdOutlinePermIdentity } from "react-icons/md";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { setUserInfo } from "../store/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setError, setUserInfo } from "../store/userSlice";
 import { useMutation } from "@tanstack/react-query";
 import { loginUser } from "../api/apiUser";
+import { isVisible } from "@testing-library/user-event/dist/utils";
 const LoginWrap = styled.div`
   position: relative;
   width: 100%;
@@ -26,7 +28,7 @@ const LoginArea = styled.div`
   top: 50%;
   transform: translate(-50%,-50%);
   gap: 20px;
-  background-color: ${props=> props.theme.colors.primary};
+  background-color: ${props => props.theme.colors.primary};
   padding: 70px 50px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -54,45 +56,51 @@ const LoginBtn = styled.button`
 export default function Login() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [err,setErr] = useState(null);
-    const [userId, setUserId]  = useState("");
-    const [userPw, setUserPw]  = useState("");
+    const [err, setErr] = useState(null);
+    const [userId, setUserId] = useState("");
+    const [userPw, setUserPw] = useState("");
+    const msg401 = "로그인이 필요한 서비스입니다."
+    const msg403 = "로그인 인증이 만료되었습니다.<br /> 다시 로그인해 주세요."
+    const error = useSelector(state => state.user.error);
     const mutation = useMutation({
         mutationFn: loginUser,
-        onSuccess : (data) => {
-            console.log('data',data);
+        onSuccess: (data) => {
+            console.log('data', data);
             if (data.error) {
                 setErr(data.msg || "로그인 실패");
                 return;
             }
             const userInfo = data?.data;
-            localStorage.setItem("authToken",data?.data?.accessToken);
+            localStorage.setItem("authToken", data?.data?.accessToken);
             localStorage.setItem("userInfo", JSON.stringify(data?.data));
             dispatch(setUserInfo(userInfo));
             navigate('/');
         },
-        onError : (err) => {
-            console.log('err',err);
+        onError: (err) => {
+            console.log('err', err);
             setErr(err?.response?.data?.msg || "서버 통신 실패");
         },
     });
-    useEffect(()=>{
+    useEffect(() => {
         const token = localStorage.getItem("authToken");
-        if(token){
+        if (token) {
             navigate('/');
         }
-    },[]);
-    const handleLogin = () =>{
-        if(!userId || !userPw){
+    }, []);
+    const handleLogin = () => {
+        if (!userId || !userPw) {
             setErr("입력해");
-           return; 
+            return;
         }
         const userData = {
-            username : userId,
-            password : userPw
+            username: userId,
+            password: userPw
         }
         mutation.mutate(userData);
         // dispatch(setUserInfo(userData));
+    }
+    const onCloseDialogHandler = () => {
+        dispatch(setError(null));
     }
     return (
         <LoginWrap>
@@ -100,11 +108,11 @@ export default function Login() {
                 <LoginTitle>로그인</LoginTitle>
                 <LoginInput>
                     <label htmlFor="userId"><MdOutlinePermIdentity className="icon-sm" /></label>
-                    <input type="text" id="userId" placeholder="아이디" value={userId} onChange={e=>setUserId(e.target.value)} />
+                    <input type="text" id="userId" placeholder="아이디" value={userId} onChange={e => setUserId(e.target.value)} />
                 </LoginInput>
                 <LoginInput>
                     <label htmlFor="userPw"><RiLockPasswordLine className="icon-sm" /></label>
-                    <input type="password" id="userPw" placeholder="비밀번호" value={userPw} onChange={e=>setUserPw(e.target.value)} />
+                    <input type="password" id="userPw" placeholder="비밀번호" value={userPw} onChange={e => setUserPw(e.target.value)} />
                 </LoginInput>
                 <LoginInput>
                     <p className="err ft__8">{err}</p>
@@ -114,7 +122,15 @@ export default function Login() {
                 </LoginInput>
                 <Link to="/sign-up" className="ft__7">아직 계정이 없으신가요? <span className="underline">회원가입</span></Link>
             </LoginArea>
-
+            {
+                error &&
+                <AlertModal
+                    isVisible={error}
+                    title="알림"
+                    content={error?.status === 401 ? msg401 : msg403}
+                    onCloseDialogHandler={onCloseDialogHandler}
+                />
+            }
         </LoginWrap>
     );
 }

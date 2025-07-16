@@ -3,6 +3,7 @@ import axios from "axios";
 
 const initialState = {
     userInfo : null,
+    error : null,
 };
 
 const userSlice = createSlice({
@@ -13,8 +14,23 @@ const userSlice = createSlice({
             if (JSON.stringify(state.userInfo) !== JSON.stringify(action.payload)) {
                 state.userInfo = action.payload;
             }
-        }
-    }
+        },
+        setError : (state, action) => {
+          state.error = action.payload;
+          console.log('state.errorStatus',state.error);
+      }
+    },
+    // extraReducers: (builder) => {
+    //   builder
+    //     .addCase(loginUser.fulfilled, (state, action) => {
+    //       state.userInfo = action.payload;
+    //       state.errorStatus = null;
+    //     })
+    //     .addCase(loginUser.rejected, (state, action) => {
+    //       state.userInfo = null;
+    //       state.errorStatus = 401; 
+    //     });
+    // }
 });
 
 //비동기
@@ -35,5 +51,5 @@ export const loginUser = createAsyncThunk(
 // 사용법
 //  await dispatch(loginUser({ userId, userPw })).unwrap();
 
-export const { setUserInfo} = userSlice.actions;
+export const { setUserInfo, setError} = userSlice.actions;
 export default userSlice.reducer;

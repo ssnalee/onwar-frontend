@@ -1,5 +1,5 @@
 
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
 import { theme } from './utils/theme';
@@ -49,15 +49,38 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
+function isTokenValid(token) {
+  if(!token) return false;
+  try {
+    const payloadBase64 = token.split('.')[1];
+    const payload = JSON.parse(atob(payloadBase64));
+    const currentTime = Math.floor(Date.now() / 1000);
+    return currentTime < payload.exp;
+  } catch (e) {
+    console.error('Invalid token', e);
+    return false;
+  }
+}
+
 function App() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  const error = useSelector(state => state.user.error);
   useEffect(() => {
-    if (token && userInfo) {
+    if (isTokenValid(token) && userInfo) {
       dispatch(setUserInfo(userInfo));
+    } else {
+      localStorage.clear();
+      dispatch(setUserInfo(null));
     }
   }, []);
+  useEffect(() => {
+    if(error?.status === 401 || error?.status === 403) {
+      navigate('/login');
+    }
+  }, [error]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -77,7 +100,6 @@ function App() {
               <Route path="/board/quick-play" element={<QuickPlay />}></Route>
             </Routes>
           </div>
-
         </div>
         <Footer />
       </div>

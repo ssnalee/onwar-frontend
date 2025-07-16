@@ -213,7 +213,7 @@ align-items: center;
 justify-content: space-between;
 gap: 5px;
 li{
-    background-color: ${props => props.heroColor};
+    background-color: ${props => props.herocolor};
     border-radius: 5px;
     overflow: hidden;
     font-family: ${({ theme }) => theme.fontFamily.sub2}, sans-serif;
@@ -269,12 +269,12 @@ export default function SearchUser() {
         // refetch();
         console.log('data', data);
     }
-    const setHeros = (name) => {
-        return heros[name]?.label || name;
-    }
+    // const setHeros = (name) => {
+    //     return heros[name]?.label || name;
+    // }
     useEffect(() => {
         refetch();
-        console.log('data', data);
+        // console.log('data', data);
     }, [])
     useEffect(() => {
         const tag = searchParams.get("battletag");
@@ -369,7 +369,7 @@ export default function SearchUser() {
                                     />
                                     {/* <p>{setHeros(heroName)}</p> */}
                                 </Character>
-                                <StatList heroColor={heros[heroName]?.color || '#555'}>
+                                <StatList herocolor={heros[heroName]?.color || '#555'}>
                                     <StatItem>
                                         <p>플레이 시간</p>
                                         <p>{heroData?.game?.timePlayed || "-"}</p>
