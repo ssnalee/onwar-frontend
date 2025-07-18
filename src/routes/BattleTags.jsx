@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getBattletagList, patchBattletag, postBattletag } from "../api/apiTag";
 import { deleteBattletag } from './../api/apiTag';
 import ModalFrame from "../components/modal/modalFrame";
+import Spinner from "../components/Spinner"
 const Title = styled.h3`
    margin: 50px 0;
    display: flex;
@@ -88,6 +89,12 @@ const ModalBody = styled.div`
   font-size: 15px;
   line-height: 1.5;
   /* text-align: center; */
+  input{
+    border: 1px solid #ffca00;
+    &.error{
+        border: 1px solid #ff0000;
+    }
+  }
 `;
 
 const ModalButtonWrap = styled.div`
@@ -205,7 +212,7 @@ export default function BattleTags() {
             <BattleTagList>
                 <h5>#배틀태그 리스트</h5>
                 {
-                    isLoading ? (<>Loading ...</>) :
+                    isLoading ? (<Spinner str={true} />) :
                         error || tagList?.error ?
                             (<p>{tagList?.msg || '리스트를 불러오는데 오류가 발생하였습니다.'}</p>) :
                             tagList?.data?.length > 0 ?
@@ -222,6 +229,7 @@ export default function BattleTags() {
                 }
                 <span>*배틀태그를 클릭하면 검색페이지로 이동합니다!!</span>
                 <span>(PLATFORM - PC , REGION - ASIA 를 기준으로 합니다.)</span>
+
             </BattleTagList>
             {
                 editingId !== null ?

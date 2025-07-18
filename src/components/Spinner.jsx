@@ -1,0 +1,65 @@
+import styled from "styled-components";
+
+const SpinnerWrap = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 100px;
+&.spinner-wrap{
+  position: fixed;
+  left: 50%;
+  top : 40%;
+  transform: translate(-50%,-50%);
+}
+.loader {
+  width: 12px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  animation: l5 1s infinite linear alternate;
+}
+@keyframes l5 {
+    0%  {box-shadow: 20px 0 #000, -20px 0 #0002;background: #000 }
+    33% {box-shadow: 20px 0 #000, -20px 0 #0002;background: #0002}
+    66% {box-shadow: 20px 0 #0002,-20px 0 #000; background: #0002}
+    100%{box-shadow: 20px 0 #0002,-20px 0 #000; background: #000 }
+}
+
+/* HTML: <div class="loader"></div> */
+.loader-text {
+  width: fit-content;
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 30px;
+  background:linear-gradient(90deg,#000 50%,#0000 0) right/200% 100%;
+  animation: l21 2s infinite linear;
+}
+.loader-text::before {
+  content :"Loading...";
+  color: #0000;
+  padding: 0 5px;
+  background: inherit;
+  background-image: linear-gradient(90deg,#fff 50%,#000 0);
+  -webkit-background-clip:text;
+          background-clip:text;
+}
+
+@keyframes l21{
+  100%{background-position: left}
+}
+`;
+
+
+const Spinner = ({
+    style,
+    isFixed = false,
+    str = false,
+}) => {
+    return (
+        <SpinnerWrap className={isFixed ? 'spinner-wrap' : ''} style={style}>
+           <div className={str ? "loader-text" : "loader"}></div>
+        </SpinnerWrap>
+    )
+}
+
+export default Spinner;

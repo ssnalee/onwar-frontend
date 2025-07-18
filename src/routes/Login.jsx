@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setError, setUserInfo } from "../store/userSlice";
 import { useMutation } from "@tanstack/react-query";
 import { loginUser } from "../api/apiUser";
-import { isVisible } from "@testing-library/user-event/dist/utils";
+import { isTokenValid } from "../utils/utils";
 const LoginWrap = styled.div`
   position: relative;
   width: 100%;
@@ -83,17 +83,20 @@ export default function Login() {
     });
     useEffect(() => {
         const token = localStorage.getItem("authToken");
-        if (token) {
+        if (token && isTokenValid(token)) {
             navigate('/');
+        }else{
+            localStorage.clear();
+            dispatch(setUserInfo(null));;
         }
     }, []);
     const handleLogin = () => {
         if (!userId || !userPw) {
-            setErr("입력해");
+            setErr("입력해야함");
             return;
         }
         const userData = {
-            username: userId,
+             username: userId,
             password: userPw
         }
         mutation.mutate(userData);

@@ -17,6 +17,7 @@ import Competitive from './routes/board/BoardCompetitive';
 import QuickPlay from './routes/board/BoardQuickPlay';
 import { setUserInfo } from './store/userSlice';
 import { useEffect } from 'react';
+import { isTokenValid } from './utils/utils';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -49,18 +50,7 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-function isTokenValid(token) {
-  if(!token) return false;
-  try {
-    const payloadBase64 = token.split('.')[1];
-    const payload = JSON.parse(atob(payloadBase64));
-    const currentTime = Math.floor(Date.now() / 1000);
-    return currentTime < payload.exp;
-  } catch (e) {
-    console.error('Invalid token', e);
-    return false;
-  }
-}
+
 
 function App() {
   const dispatch = useDispatch();
@@ -78,6 +68,7 @@ function App() {
   }, []);
   useEffect(() => {
     if(error?.status === 401 || error?.status === 403) {
+      console.log('탔다')
       navigate('/login');
     }
   }, [error]);
