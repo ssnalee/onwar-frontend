@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
+import AlertModal from '../components/modal/modalAlert';
 import { TiDelete } from "react-icons/ti";
 import { FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -53,6 +54,11 @@ const BattleTagList = styled.div`
             font-weight: 600;
             p{
                 cursor: pointer;
+            }
+            button{
+                display: flex;
+                padding: 0;
+                margin-left: 5px;
             }
         }
     }
@@ -133,45 +139,34 @@ export default function BattleTags() {
         mutationFn: postBattletag,
         onSuccess: (data) => {
             queryClient.invalidateQueries(['tagList']);
-            if (data.error) {
-                setErr(data.msg || "배틀태그 저장 중 오류가 발생했습니다.");
-                return;
-            }
             setBattletag('');
             setErr(null);
         },
         onError: (err) => {
-            setErr(err?.response?.data?.msg || "서버 통신 실패");
+            setErr(err?.response?.data?.msg || "배틀태그 저장 중 오류가 발생했습니다.");
         },
     });
     const updateMutation = useMutation({
         mutationFn: patchBattletag,
         onSuccess: (data) => {
             queryClient.invalidateQueries(['tagList']);
-            if (data.error) {
-                setErr(data.msg || "배틀태그 업데이트 중 오류가 발생했습니다.");
-                return;
-            }
             setBattletag('');
             setErr(null);
+            setEditingId(null);
         },
         onError: (err) => {
-            setErr(err?.response?.data?.msg || "서버 통신 실패");
+            setErr(err?.response?.data?.msg || "배틀태그 업데이트 중 오류가 발생했습니다.");
         },
     });
     const deleteMutation = useMutation({
         mutationFn: deleteBattletag,
         onSuccess: (data) => {
             queryClient.invalidateQueries(['tagList']);
-            if (data.error) {
-                setErr(data.msg || "배틀태그 삭제 중 오류가 발생했습니다.");
-                return;
-            }
             setBattletag('');
             setErr(null);
         },
         onError: (err) => {
-            setErr(err?.response?.data?.msg || "서버 통신 실패");
+            setErr(err?.response?.data?.msg || "배틀태그 삭제 중 오류가 발생했습니다.");
         },
     });
     const handleSave = () => {
@@ -194,10 +189,13 @@ export default function BattleTags() {
     const closeHandler = (key) => {
         if (key === 1 && editingId) {
             updateMutation.mutate({ id: editingId, tag: editInput });
+        }else{
+            setEditingId(null);
         }
-        setEditingId(null);
     };
-
+    const onCloseDialogHandler = () => {
+        setErr(null);
+    }
     return (
         <>
             <Title>내 배틀태그 관리</Title>
@@ -255,6 +253,15 @@ export default function BattleTags() {
                         </ModalButtonWrap>
                     </ModalFrame>
                     : null
+            }
+            {
+                err &&
+                <AlertModal
+                isVisible={err}
+                title="알림"
+                content={err}
+                onCloseDialogHandler={onCloseDialogHandler}
+               />
             }
         </>
     )

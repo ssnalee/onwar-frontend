@@ -81,7 +81,7 @@ const AlertModal = ({
       >
         <ModalTitle>
           <h4>{title}</h4>
-          {!isBtn && <div className="close_btn" onClick={closeHandler}><IoCloseCircle font-size="25px" /></div>}
+          {!isBtn && <div className="close_btn" onClick={closeHandler}><IoCloseCircle fontSize="25px" /></div>}
         </ModalTitle>
   
         <ModalBody dangerouslySetInnerHTML={{ __html: content }} />
