@@ -3,20 +3,11 @@ import { getProfile } from "../api/apiOw";
 import { useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FiCheck } from "react-icons/fi";
-import { FaSearch } from "react-icons/fa";
 import styled from "styled-components";
 import { heros } from "../utils/heros";
 import { useSearchParams } from "react-router-dom";
-const SearchTitle = styled.h3`
-   margin: 50px 0;
-   display: flex;
-   align-items: center;
-   gap: 5px;
-   font-size: 40px;
-   color:#616161;
-   /* font-weight: 400; */
-`;
 const SearchWrap = styled.div`
+   margin-top: 50px;
    display: flex;
    input{
     width: 100%;
@@ -284,7 +275,6 @@ export default function SearchUser() {
     }, [searchParams]);
     return (
         <>
-            <SearchTitle><FaSearch />배틀태그 검색</SearchTitle>
             <SearchWrap>
                 <input type="text" placeholder="배틀태그 예) 홍길동#1234" value={searchTag} onChange={(e) => setSearchTag(e.target.value)} onKeyDown={(e) => {
                     if (e.key === 'Enter') {

@@ -1,5 +1,10 @@
-import { Link } from "react-router-dom";
+import { MAINMENU } from "../utils/menu";
+import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
+import { isVisible } from '@testing-library/user-event/dist/utils';
+import { useState } from "react";
+import AlertModal from '../components/modal/modalAlert';
+
 const Side = styled.div`
   position: fixed;
   left: 0;
@@ -16,35 +21,85 @@ const Nav = styled.nav`
   flex-direction: column;
   gap: 10px;
   width: 100%;
+  >div{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
   p{
     font-weight: 600;
     /* text-align: center; */
-    color: ${props=> props.theme.colors.deep_gray};
+    color: ${props => props.theme.colors.deep_gray};
   }
    a{
-    /* color: ${props=> props.theme.colors.txt_reverse}; */
+    padding: 5px;
+    border-radius: 5px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    &:hover{
+      background: linear-gradient(to right, #ffbb00 0%, rgba(255, 208, 0, 0) 100%);
+    }
+    &.active{
+      background: linear-gradient(to right, #ffbb00 0%, rgba(255, 208, 0, 0) 100%);
+      color:#000;
+
+    }
+   }
+   span{
+    font-size: 0.6rem;
+    background-color: #48eb08;
+    color:#fff;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    padding: 2px;
    }
 `;
 export default function Aside() {
-    return (
-        <Side>
-            <Nav>
-                <p>HEROS</p>
-                <div className="gray-line"></div>
-                <Link to="/news">최신 패치노트</Link>
-                <Link to="/gallery">영웅 갤러리</Link>
-                <p>BATTLETAGS</p>
-                <div className="gray-line"></div>
-                <Link to="/search">배틀태그 검색</Link>
-                <Link to="/battletag">내 배틀태그 관리</Link>
-                <p>COMMUNITY</p>
-                <div className="gray-line"></div>
-                <Link to="/board/competitive">경쟁전 파티 구함</Link>
-                <Link to="/board/quick-play">빠른대전 파티 구함</Link>
-                <Link to="/promote">홍보 채널</Link>
-            </Nav>
-        </Side>
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const [isVisible, setIsVisible] = useState(false);
+  return (
+    <Side>
+      <Nav>
+        {
+          MAINMENU.map(menu => (
+            <div key={menu.id}>
+              <p>{menu.title}</p>
+              <div className="gray-line"></div>
+              {
+                menu.subMenu.map(sub => (
+                  <Link
+                    key={sub.path}
+                    to={sub.beta ? '#' : sub.path}
+                    className={sub.path === currentPath ? 'active' : ''}
+                    onClick={e => {
+                      if (sub.beta) {
+                        e.preventDefault();
+                        setIsVisible(true);
+                      }
+                    }}
+                  >{sub.title}
+                   {sub.beta && <span>준비중</span>}
+                  </Link>
+                ))
+              }
+            </div>
+          ))
+        }
+      </Nav>
+      {
+        isVisible &&
+        <AlertModal
+          isVisible={isVisible}
+          title="알림"
+          content="해당 서비스는 준비중입니다."
+          onCloseDialogHandler={()=>setIsVisible(false)}
+        />
+      }
+    </Side>
 
-    )
+  )
 }
 

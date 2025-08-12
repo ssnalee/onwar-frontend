@@ -10,3 +10,8 @@ export function isTokenValid(token) {
       return false;
     }
   }
+
+  export function formattedDate  (date) {
+    const [first, second] = date.split('T');    
+    return `${first} ${second.slice(0,5)}`;
+  }

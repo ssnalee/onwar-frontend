@@ -9,16 +9,8 @@ import { getBattletagList, patchBattletag, postBattletag } from "../api/apiTag";
 import { deleteBattletag } from './../api/apiTag';
 import ModalFrame from "../components/modal/modalFrame";
 import Spinner from "../components/Spinner"
-const Title = styled.h3`
-   margin: 50px 0;
-   display: flex;
-   align-items: center;
-   gap: 5px;
-   font-size: 40px;
-   color:#616161;
-   /* font-weight: 400; */
-`;
 const SaveWrap = styled.div`
+    margin-top: 50px;
    display: flex;
    input{
     width: 100%;
@@ -71,6 +63,7 @@ const BattleTagList = styled.div`
             margin-top: 10px;
         }
         display: block;
+        line-height: 30px;
         font-size: 20px;
         font-weight: 600;
         font-family: ${({ theme }) => theme.fontFamily.sub2}, sans-serif;
@@ -189,7 +182,7 @@ export default function BattleTags() {
     const closeHandler = (key) => {
         if (key === 1 && editingId) {
             updateMutation.mutate({ id: editingId, tag: editInput });
-        }else{
+        } else {
             setEditingId(null);
         }
     };
@@ -198,7 +191,6 @@ export default function BattleTags() {
     }
     return (
         <>
-            <Title>내 배틀태그 관리</Title>
             <SaveWrap>
                 <input type="text" placeholder="배틀태그 예) 홍길동#1234" value={battletag} onChange={(e) => setBattletag(e.target.value)} onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -223,8 +215,14 @@ export default function BattleTags() {
                                         </li>
                                     ))}
                                 </ul>) :
-                                (<span>*배틀태그를 추가하면 더욱 쉽게 관리할 수 있어요.</span>)
+                                (<>
+                                    <span>저장된 배틀태그가 없습니다. <br />배틀태그를 추가하면 더욱 쉽게 관리할 수 있어요.</span>
+                                    <br />
+                                    <br />
+                                    <br />
+                                </>)
                 }
+
                 <span>*배틀태그를 클릭하면 검색페이지로 이동합니다!!</span>
                 <span>(PLATFORM - PC , REGION - ASIA 를 기준으로 합니다.)</span>
 
@@ -257,11 +255,11 @@ export default function BattleTags() {
             {
                 err &&
                 <AlertModal
-                isVisible={err}
-                title="알림"
-                content={err}
-                onCloseDialogHandler={onCloseDialogHandler}
-               />
+                    isVisible={err}
+                    title="알림"
+                    content={err}
+                    onCloseDialogHandler={onCloseDialogHandler}
+                />
             }
         </>
     )

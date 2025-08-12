@@ -1,5 +1,5 @@
-import { isVisible } from '@testing-library/user-event/dist/utils';
 import React, { useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import styled from 'styled-components';
 
 const ModalOverlay = styled.div`
@@ -47,29 +47,30 @@ const ModalFrame = ({
         } else {
             document.body.style.overflow = 'auto';
         }
-
         return () => {
             document.body.style.overflow = 'auto';
-        }
+        };
     }, [isVisible]);
 
     const overlayClickHandler = (e) => {
         if (e.target === e.currentTarget && isOverlay) {
             onCloseDialogHandler?.();
         }
-    }
+    };
 
     if (!isVisible) return null;
-    return (
+
+    return ReactDOM.createPortal(
         <ModalOverlay
-          className={isOverlay ? 'is_over' : ''}
-          onClick={overlayClickHandler}
+            className={isOverlay ? 'is_over' : ''}
+            onClick={overlayClickHandler}
         >
-          <ModalWrap style={{ width, height, maxWidth }}>
-            {children}
-          </ModalWrap>
-        </ModalOverlay>
-      );
-}
+            <ModalWrap style={{ width, height, maxWidth }}>
+                {children}
+            </ModalWrap>
+        </ModalOverlay>,
+        document.body
+    );
+};
 
 export default ModalFrame;
