@@ -1,10 +1,10 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { increment } from '../store/counterSlice';
+import { increment } from '@/store/counterSlice';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { getTest } from '../api/api';
+import { getTest } from '@/api/api';
 import { useNavigate } from 'react-router-dom';
-import ConfirmModal from '../components/modal/modalConfirm';
+import ConfirmModal from '@/components/modal/modalConfirm';
 
 export default function Home() {
     const count = useSelector((state) => state.counter.value);

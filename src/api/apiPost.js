@@ -9,11 +9,12 @@ export const getBoardList = async (params) => {
     });
 }
 
-export const postBoard = async (options ) => {
+export const postBoard = async (options) => {
+    console.log('options',options);
     return apiRequest({
         method: options.method === 'POST' ? 'POST' : 'PATCH',
-        url: '/board/posts',
-        params: options.params,
+        url: '/board/post',
+        // params: options.params,
         data: options.data,
     });
 }
@@ -21,7 +22,7 @@ export const postBoard = async (options ) => {
 export const deleteBoard = async (id) => {
     return apiRequest({
         method: 'DELETE',
-        url: `/board/posts/${id}`,
+        url: `/board/post/${id}`,
     });
 }
 
