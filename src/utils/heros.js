@@ -116,7 +116,7 @@ export const heros = {
         image : "/images/heros/.png",
         label : "리퍼"
     },
-    "soldier76" : {
+    "soldier-76" : {
         color : "#697794",
         image : "/images/heros/.png",
         label : "솔저76"
@@ -178,11 +178,12 @@ export const heros = {
         label : "브리기테"
     },
     "kiriko" : {
-        color : "#",
+        color : "#ff8484",
         image : "/images/heros/.png",
         label : "키리코"
     },
-    "lúcio" : {
+    // "lúcio" : {
+    "lucio" : {
         color : "#85C952",
         image : "/images/heros/.png",
         label : "루시우"
@@ -216,5 +217,15 @@ export const heros = {
         color : "#A78BFA",
         image : "/images/heros/.png",
         label : "주노"
+    },
+    "wuyang" : {
+        color : "#0089ff",
+        image : "/images/heros/.png",
+        label : "우양"
+    },
+    "freja" : {
+        color : "#31d57a",
+        image : "/images/heros/.png",
+        label : "프레야"
     },
 }

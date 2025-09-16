@@ -251,11 +251,11 @@ const BoardTitleContainer = styled.div`
     }
 `;
 
-const CommentOptions = styled.div``;
+// const CommentOptions = styled.div``;
 
-const EditingForm = styled.form`
+// const EditingForm = styled.form`
 
-`;
+// `;
 
 export default function BoardComponent({ category }) {
     const queryClient = useQueryClient();
@@ -264,6 +264,7 @@ export default function BoardComponent({ category }) {
     const [confirmMsg, setConfirmMsg] = useState(false);
     const [tagNo, setTagNo] = useState(0);
     const [tagItems, setTagItems] = useState([]);
+    const [searchItems, setSearchItems] = useState([]);
     const [postTags, setPostTags] = useState([]);
     const [battletag, setBattletag] = useState("");
     const [comment, setComment] = useState("");
@@ -287,6 +288,19 @@ export default function BoardComponent({ category }) {
 
     const isOptionDisabled = (option) =>
         postTags.length >= 5 && !postTags.includes(option.value);
+
+    const filterdBoardData = useMemo(() => {
+        if (!boardData?.data) return [];
+        return boardData?.data.filter(item =>
+           {
+            if (!Array.isArray(item.hashtags)) return false;
+            if (searchItems.length === 0) return true;
+            const hashtagsSet = new Set(item.hashtags);
+            console.log('item.hashtags',item.hashtags);
+            console.log('hashtagsSet',hashtagsSet);
+            return searchItems.every(s => hashtagsSet.has(s.tag));
+           });
+    },[boardData, searchItems]);
 
     const postMutation = useMutation({
         mutationFn: postBoard,
@@ -392,7 +406,8 @@ export default function BoardComponent({ category }) {
     }
 
     const handleSearch = () => {
-
+        setSearchItems(tagItems);
+        console.log('tag',tagItems);
     }
 
     const handlePostBoard = () => {
@@ -497,7 +512,7 @@ export default function BoardComponent({ category }) {
                     boardError || boardData?.error ?
                         <p>{boardError.data?.msg || '패치 중 에러가 발생하였습니다.'}</p> :
 
-                        boardData?.data?.map((item) => (
+                        filterdBoardData.map((item) => (
                             <BoardItem key={item.post_id}>
 
                                 {

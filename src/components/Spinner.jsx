@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 const SpinnerWrap = styled.div`
   display: flex;
@@ -48,16 +48,39 @@ const SpinnerWrap = styled.div`
   100%{background-position: left}
 }
 `;
+const dots = keyframes`
+  0%   { content: "" }
+  33%  { content: "." }
+  66%  { content: ".." }
+  100% { content: "..." }
+`;
 
+const LoaderText = styled.div`
+  font-weight: bold;
+  /* font-family: monospace; */
+  font-size: 30px;
+
+  &::after {
+    display: inline-block;
+    animation: ${dots} 1.5s steps(3, end) infinite;
+    content: "";
+  }
+`;
 
 const Spinner = ({
     style,
     isFixed = false,
     str = false,
+    loadingText = null,
 }) => {
     return (
         <SpinnerWrap className={isFixed ? 'spinner-wrap' : ''} style={style}>
-           <div className={str ? "loader-text" : "loader"}></div>
+          { loadingText ? (
+             <LoaderText>{loadingText}</LoaderText>
+          ) : (
+             <div className={str ? "loader-text" : "loader"}></div>
+          )}
+          
         </SpinnerWrap>
     )
 }

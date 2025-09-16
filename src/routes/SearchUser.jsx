@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProfile } from "../api/apiOw";
+import { getFastProfile, getProfile } from "../api/apiOw";
 import { useEffect, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FiCheck } from "react-icons/fi";
@@ -238,11 +238,15 @@ export default function SearchUser() {
     const [isDropdown2, setIsDropdown2] = useState(false);
     const [platform, setPlatform] = useState("pc");
     const [region, setRegion] = useState("asia");
-    const [battletag, setBattletag] = useState("mercy76#3111");
+    const [battletag, setBattletag] = useState("MERCY76#3111");
     const [searchTag, setSearchTag] = useState("");
     const { data, error, isLoading, refetch } = useQuery({
         queryKey: ['battletag', battletag],
         queryFn: () => getProfile({ platform, region, battletag })
+    });
+    const { data : careerData , error : careerError, isLoading : careerIsLoading, refetch : careerRefetch } = useQuery({
+        queryKey: ['careerProfile', battletag],
+        queryFn: () => getFastProfile({ platform, region, battletag })
     });
     const selectedPlatform = (item) => {
         setPlatform(item);
@@ -260,12 +264,21 @@ export default function SearchUser() {
         // refetch();
         console.log('data', data);
     }
+    const secondsToTime =(sec) => {
+        const hours = String(Math.floor(sec / 3600)).padStart(2, "0");
+        const minutes = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
+        const seconds = String(sec % 60).padStart(2, "0");
+        return ` ${hours} : ${minutes} : ${seconds} `;
+      }
     // const setHeros = (name) => {
     //     return heros[name]?.label || name;
     // }
     useEffect(() => {
         refetch();
-        // console.log('data', data);
+        careerRefetch();
+        console.log('careerData',careerData);
+
+        console.log('data', data);
     }, [])
     useEffect(() => {
         const tag = searchParams.get("battletag");
@@ -321,7 +334,7 @@ export default function SearchUser() {
                         <TierWrap className="tier-wrap">
                             {
                                 positions.map((v, idx) => {
-                                    const matchedRating = data?.ratings.find(rating => rating.role === v);
+                                    const matchedRating = data?.ratings?.find(rating => rating.role === v);
                                     return (
                                         <div key={idx}>
                                             <div className="pos">
@@ -346,8 +359,10 @@ export default function SearchUser() {
                     <HeroWrap>
                         {/* <img src="/images/heros/default.svg" /> */}
                         <h5>경쟁전 영웅별 스탯 <span>{data?.competitiveStats?.season}시즌</span> </h5>
-                        {data?.competitiveStats?.careerStats && Object.entries(data?.competitiveStats?.careerStats
-                        ).slice(1).map(([heroName, heroData]) => (
+                        {careerData?.heroes && Object.entries(careerData?.heroes
+                        )
+                        .sort(([, a], [, b]) => b.time_played - a.time_played)
+                        .map(([heroName, heroData]) => (
                             <Competition key={heroName}>
                                 <Character>
                                     <img src={`/images/heros/${heroName}.png`}
@@ -359,26 +374,26 @@ export default function SearchUser() {
                                     />
                                     {/* <p>{setHeros(heroName)}</p> */}
                                 </Character>
-                                <StatList herocolor={heros[heroName]?.color || '#555'}>
+                                <StatList className={heroName} herocolor={heros[heroName]?.color || '#555'}>
                                     <StatItem>
                                         <p>플레이 시간</p>
-                                        <p>{heroData?.game?.timePlayed || "-"}</p>
+                                        <p>{secondsToTime(heroData?.time_played) || "-"}</p>
                                     </StatItem>
                                     <StatItem>
                                         <p>승 / 패 (승률)</p>
-                                        <p>{heroData?.game?.gamesWon || "0"} / {heroData?.game?.gamesLost || "0"} ({heroData?.game?.winPercentage || "-"})</p>
+                                        <p>{heroData?.games_won || "0"} / {heroData?.games_lost || "0"} ({`${heroData?.winrate}%` || "-"})</p>
                                     </StatItem>
                                     <StatItem>
                                         <p>10분당 목처</p>
-                                        <p>{heroData?.average?.deathsAvgPer10Min || "-"}</p>
+                                        <p>{heroData?.kda || "-"}</p>
                                     </StatItem>
                                     <StatItem>
                                         <p>10분당 데미지</p>
-                                        <p>{heroData?.average?.heroDamageDoneAvgPer10Min || "-"}</p>
+                                        <p>{heroData?.average?.damage || "-"}</p>
                                     </StatItem>
                                     <StatItem>
                                         <p>10분당 힐량</p>
-                                        <p>{heroData?.average?.healingDoneAvgPer10Min || "-"}</p>
+                                        <p>{heroData?.average?.healing || "-"}</p>
                                     </StatItem>
 
                                 </StatList>
