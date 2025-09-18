@@ -23,13 +23,24 @@ const ModalWrap = styled.div`
   left: 50%;
   min-width: 300px;
   transform: translate(-50%, -50%);
-  overflow: hidden;
+  overflow: auto;
   background: #fff;
   backdrop-filter: blur(25px);
   border-radius: 15px;
   z-index: 1059;
   cursor: auto;
   border: 2px solid #ffd518;
+  &::-webkit-scrollbar {
+    display: block;
+    width: 8px;   
+  }  
+  &::-webkit-scrollbar-thumb {
+    background-color: #2861ff; 
+    border-radius: 4px;       
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;  
+  }
 `;
 
 const ModalFrame = ({
@@ -38,6 +49,7 @@ const ModalFrame = ({
     width = 'fit-content',
     height = 'fit-content',
     maxWidth = '100%',
+    style = null,
     onCloseDialogHandler,
     children
 }) => {
@@ -65,7 +77,7 @@ const ModalFrame = ({
             className={isOverlay ? 'is_over' : ''}
             onClick={overlayClickHandler}
         >
-            <ModalWrap style={{ width, height, maxWidth }}>
+            <ModalWrap style={{ width, height, maxWidth, ...style }}>
                 {children}
             </ModalWrap>
         </ModalOverlay>,

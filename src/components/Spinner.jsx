@@ -17,6 +17,9 @@ const SpinnerWrap = styled.div`
   aspect-ratio: 1;
   border-radius: 50%;
   animation: l5 1s infinite linear alternate;
+  &.w{
+    animation: l2 1s infinite linear alternate;
+  }
 }
 @keyframes l5 {
     0%  {box-shadow: 20px 0 #000, -20px 0 #0002;background: #000 }
@@ -24,7 +27,12 @@ const SpinnerWrap = styled.div`
     66% {box-shadow: 20px 0 #0002,-20px 0 #000; background: #0002}
     100%{box-shadow: 20px 0 #0002,-20px 0 #000; background: #000 }
 }
-
+@keyframes l2 {
+    0%  { box-shadow: 20px 0 #fff, -20px 0 #fff2; background: #fff; }
+    33% { box-shadow: 20px 0 #fff, -20px 0 #fff2; background: #fff2; }
+    66% { box-shadow: 20px 0 #fff2, -20px 0 #fff; background: #fff2; }
+    100%{ box-shadow: 20px 0 #fff2, -20px 0 #fff; background: #fff; }
+}
 /* HTML: <div class="loader"></div> */
 .loader-text {
   width: fit-content;
@@ -70,6 +78,7 @@ const LoaderText = styled.div`
 const Spinner = ({
     style,
     isFixed = false,
+    isWhite = false,
     str = false,
     loadingText = null,
 }) => {
@@ -78,7 +87,7 @@ const Spinner = ({
           { loadingText ? (
              <LoaderText>{loadingText}</LoaderText>
           ) : (
-             <div className={str ? "loader-text" : "loader"}></div>
+             <div className={str ? "loader-text" : isWhite ? "loader w" : "loader"}></div>
           )}
           
         </SpinnerWrap>

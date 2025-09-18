@@ -13,6 +13,12 @@
 .pr{
     position: relative;
 }
+.gray{
+    color: #999;
+}
+.yellow{
+    color:#ffe816;
+}
 .err{
     color: #ff0c04;
 }
@@ -45,4 +51,10 @@
 
 .underline{
     text-decoration: underline;
+}
+.mb__5{
+    margin-bottom: 5px;
+}
+.mb__10{
+    margin-bottom: 10px;
 }

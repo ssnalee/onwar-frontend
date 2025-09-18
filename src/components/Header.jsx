@@ -19,6 +19,7 @@ const Head = styled.header`
     display: flex;
     align-items: center;
     gap: 10px;
+    cursor: pointer;
   }
 `;
 const Nav = styled.nav`
@@ -43,7 +44,7 @@ export default function Header() {
     }, [userInfo]);
     return (
         <Head>
-            <h1>
+            <h1 onClick={()=>navigate('/')}>
                 <img src="/images/heros/default.svg" />
                 ON WAR</h1>
             <Nav>

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import AlertModal from '../components/modal/modalAlert';
+import AlertModal from '@/components/modal/modalAlert';
 import { TiDelete } from "react-icons/ti";
 import { FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getBattletagList, patchBattletag, postBattletag } from "../api/apiTag";
-import { deleteBattletag } from './../api/apiTag';
-import ModalFrame from "../components/modal/modalFrame";
-import Spinner from "../components/Spinner"
+import { deleteBattletag } from '@/api/apiTag';
+import ModalFrame from "@/components/modal/modalFrame";
+import Spinner from "@/components/Spinner"
 const SaveWrap = styled.div`
     margin-top: 50px;
    display: flex;
@@ -42,7 +42,7 @@ const BattleTagList = styled.div`
             font-size: 20px;
             display: flex;
             align-items: center;
-            font-family: ${({ theme }) => theme.fontFamily.sub2}, sans-serif;
+            family: ${({ theme }) => theme.fontFamily.sub2}, sans-serif;
             font-weight: 600;
             p{
                 cursor: pointer;

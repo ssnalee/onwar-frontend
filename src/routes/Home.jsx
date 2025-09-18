@@ -2,13 +2,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import { increment } from '@/store/counterSlice';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { getTest } from '@/api/api';
 import { useNavigate } from 'react-router-dom';
 import { getHashtagList } from "@/api/apiTag";
 import { TbZzz } from "react-icons/tb";
 import ConfirmModal from '@/components/modal/modalConfirm';
 import styled from 'styled-components';
 import Spinner from '@/components/Spinner';
+import DashboardHeros from '@/components/dashboard/DashboardHeros';
 
 const ButtonWrap = styled.div`
   position: fixed;
@@ -19,6 +19,7 @@ const ButtonWrap = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
   button{
     font-family: ${({ theme }) => theme.fontFamily.sub3}, sans-serif;
     background-color: #ffffff;
@@ -72,6 +73,10 @@ export default function Home() {
         refetch();
         sessionStorage.setItem("onApi", "true");
         setOnApi(true);
+        setTimeout(() => {
+            sessionStorage.setItem("onApi", "false");
+            setOnApi(false);
+          }, 10 * 60 * 1000);
     }
 
     useEffect(() => {
@@ -96,7 +101,10 @@ export default function Home() {
                 (
                     <Spinner loadingText={"서버 깨우는 중"} isFixed={true} style={{ left: "calc(50% + 100px)", fontFamily: "Jua, sans-serif", top: "50%" }} />
                 ) : onApi ? (
-                    <div></div>
+                    <>
+                        <DashboardHeros />
+                    </>
+
                 ) : (
                     <ButtonWrap>
                         <button onClick={() => { apiLoadingHandler() }}>API 깨우기 <TbZzz /></button>

@@ -23,3 +23,13 @@ export const getFastProfile = async (data) => {
     return response.data;
     // 
 }
+
+export const getHeros = async () => {
+    const response = await axios.get(`https://overfast-api.tekrop.fr/heroes?locale=ko-kr`);
+    return response.data;
+}
+
+export const getHerosIntroduction = async (hero) => {
+    const response = await axios.get(`https://overfast-api.tekrop.fr/heroes/${hero}?locale=ko-kr`);
+    return response.data;
+}
