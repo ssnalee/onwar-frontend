@@ -10,7 +10,6 @@ import { FaExclamationCircle } from "react-icons/fa";
 const ModalWrap = styled.div`
   position: relative;
   padding: 20px;
-  overflow: auto;
   color:#fff;
 `;
 
@@ -131,6 +130,7 @@ export default function DashboardSkillPopup({ isVisible, heros, onCloseDialogHan
                             <IoIosCloseCircleOutline fontSize={50} color="#fff" onClick={() => closeHandler()} />
                         </Button>
                         <HeroContainer>
+                            <h5>PROFILE</h5>
                             <HerosIntro>
                                 <img src={data?.portrait} alt={data?.name} />
                                 <div>

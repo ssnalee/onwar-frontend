@@ -11,15 +11,20 @@ import Spinner from '@/components/Spinner';
 import DashboardHeros from '@/components/dashboard/DashboardHeros';
 
 const ButtonWrap = styled.div`
-  position: fixed;
-  left: calc(50% + 100px);
+  /* position: fixed; */
+  /* left: calc(50% + 100px); */
+  z-index: 22;
+  position: relative;
+  height: 600px;
+  /* left: 50%;
   top: 50%;
-  transform: translate(-50%,-50%);
+  transform: translate(-50%,-50%); */
   font-family: ${({ theme }) => theme.fontFamily.sub3}, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
+  justify-content: center;
+  /* width: 600px; */
   button{
     font-family: ${({ theme }) => theme.fontFamily.sub3}, sans-serif;
     background-color: #ffffff;
@@ -99,7 +104,7 @@ export default function Home() {
 
             {isFetching ?
                 (
-                    <Spinner loadingText={"서버 깨우는 중"} isFixed={true} style={{ left: "calc(50% + 100px)", fontFamily: "Jua, sans-serif", top: "50%" }} />
+                    <Spinner loadingText={"서버 깨우는 중"} isFixed={true} style={{ left: "calc(50% + 100px)", fontFamily: "Jua, sans-serif", top: "45%" }} />
                 ) : onApi ? (
                     <>
                         <DashboardHeros />
