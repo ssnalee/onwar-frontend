@@ -93,7 +93,7 @@ const HerosSkill = styled.ul`
   }
   .skilname{
     font-size: 1.5rem;
-    text-align: center;
+    /* text-align: center; */
     margin-bottom: 10px;
   }
 `;

@@ -260,9 +260,6 @@ export default function SearchUser() {
         if (searchTag) {
             setBattletag(searchTag);
         }
-
-        // refetch();
-        console.log('data', data);
     }
     const secondsToTime =(sec) => {
         const hours = String(Math.floor(sec / 3600)).padStart(2, "0");
@@ -273,12 +270,15 @@ export default function SearchUser() {
     // const setHeros = (name) => {
     //     return heros[name]?.label || name;
     // }
+
+    const getKdData = (eliminations , deaths) => {
+        return deaths > 0 
+          ? ( eliminations / deaths ).toFixed(2)
+          : ( deaths === 0 && eliminations > 0 ? eliminations.toFixed(2) : "-" )
+    }
     useEffect(() => {
         refetch();
         careerRefetch();
-        console.log('careerData',careerData);
-
-        console.log('data', data);
     }, [])
     useEffect(() => {
         const tag = searchParams.get("battletag");
@@ -385,7 +385,7 @@ export default function SearchUser() {
                                     </StatItem>
                                     <StatItem>
                                         <p>10분당 목처</p>
-                                        <p>{heroData?.kda || "-"}</p>
+                                        <p>{getKdData(heroData?.average?.eliminations , heroData?.average?.deaths)}</p>
                                     </StatItem>
                                     <StatItem>
                                         <p>10분당 데미지</p>

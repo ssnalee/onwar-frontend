@@ -5,12 +5,14 @@ import ConfirmModal from '@/components/modal/modalConfirm';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { TiDelete } from "react-icons/ti";
-import { getHashtagList } from "@/api/apiTag";
+import { getBattletagList, getHashtagList } from "@/api/apiTag";
 import { hashtagColor } from "@/utils/hashtag";
 import { FaUndo } from "react-icons/fa";
 import { deleteBoard, deleteBoardComment, getBoardList, postBoard, postBoardComment } from "@/api/apiPost";
 import { formattedDate } from "@/utils/utils";
 import { FaCommentDots } from "react-icons/fa6";
+import SelectBattletag from "./BoardSelectBattletag";
+import { useSelector } from "react-redux";
 
 
 // const Title = styled.h3`
@@ -111,6 +113,12 @@ const PostForm = styled.form`
         .date{
             width: auto;
             justify-content: flex-end;
+        }
+    }
+    &:not(.edit-form){
+        >div>div:first-child{
+            width: 280px;
+            flex-shrink: 0;
         }
     }
     >div{
@@ -259,6 +267,7 @@ const BoardTitleContainer = styled.div`
 
 export default function BoardComponent({ category }) {
     const queryClient = useQueryClient();
+    const userInfo = useSelector((state) => state.user.userInfo);
 
     const [err, setErr] = useState(null);
     const [confirmMsg, setConfirmMsg] = useState(false);
@@ -266,8 +275,9 @@ export default function BoardComponent({ category }) {
     const [tagItems, setTagItems] = useState([]);
     const [searchItems, setSearchItems] = useState([]);
     const [postTags, setPostTags] = useState([]);
-    const [battletag, setBattletag] = useState("");
+    const [selectedTag, setSelectedTag] = useState("");
     const [comment, setComment] = useState("");
+    const [commentMap, setCommentMap] = useState({});
     const [editingPostId, setEditingPostId] = useState(null);
     const [editBattletag, setEditBattletag] = useState("");
     const [editPostTags, setEditPostTags] = useState([]);
@@ -276,9 +286,12 @@ export default function BoardComponent({ category }) {
     const [postId, setPostId] = useState(null);
     // const [category, setCategory] = useState(1);
     const [commentOpenMap, setCommentOpenMap] = useState({});
+    const isLoggedIn = useMemo(() => {
+        return !!(userInfo && Object.keys(userInfo).length > 0);
+    }, [userInfo])
     const { data, error } = useQuery({
-        queryKey: ['tagNo', tagNo],
-        queryFn: () => getHashtagList(tagNo)
+        queryKey: ['tagNo'],
+        queryFn: () => getHashtagList(0)
     });
 
     const { data: boardData, error: boardError } = useQuery({
@@ -286,21 +299,34 @@ export default function BoardComponent({ category }) {
         queryFn: () => getBoardList(category)
     });
 
+    const { data: battletagList } = useQuery({
+        queryKey: ['battletagList'],
+        queryFn: () => getBattletagList(),
+        enabled: isLoggedIn,
+    });
+
+    const battletagsOption = useMemo(() => {
+        if (!battletagList?.data) return [];
+        return battletagList.data.map((item) => ({
+            value: item.id,
+            label: item.battletag,
+        }));
+    }, [battletagList])
+
     const isOptionDisabled = (option) =>
         postTags.length >= 5 && !postTags.includes(option.value);
 
     const filterdBoardData = useMemo(() => {
         if (!boardData?.data) return [];
-        return boardData?.data.filter(item =>
-           {
+        return boardData?.data.filter(item => {
             if (!Array.isArray(item.hashtags)) return false;
             if (searchItems.length === 0) return true;
             const hashtagsSet = new Set(item.hashtags);
-            console.log('item.hashtags',item.hashtags);
-            console.log('hashtagsSet',hashtagsSet);
+            console.log('item.hashtags', item.hashtags);
+            console.log('hashtagsSet', hashtagsSet);
             return searchItems.every(s => hashtagsSet.has(s.tag));
-           });
-    },[boardData, searchItems]);
+        });
+    }, [boardData, searchItems]);
 
     const postMutation = useMutation({
         mutationFn: postBoard,
@@ -312,7 +338,7 @@ export default function BoardComponent({ category }) {
                 setEditBattletag("");
                 setEditPostTags([]);
             } else {
-                setBattletag("");
+                setSelectedTag("");
                 setPostTags([]);
             }
         },
@@ -337,6 +363,7 @@ export default function BoardComponent({ category }) {
         onSuccess: (data) => {
             queryClient.invalidateQueries(['category']);
             setErr(null);
+            setCommentMap(prev => ({ ...prev, [postId] : ""}));
         },
         onError: (err) => {
             setErr(err?.response?.data?.msg || "댓글 저장 중 오류가 발생했습니다.");
@@ -407,15 +434,19 @@ export default function BoardComponent({ category }) {
 
     const handleSearch = () => {
         setSearchItems(tagItems);
-        console.log('tag',tagItems);
+        console.log('tag', tagItems);
     }
 
     const handlePostBoard = () => {
+        if (!isLoggedIn) {
+            setErr("로그인 후 이용가능합니다.");
+            return;
+        }
         const isNew = !editingPostId;
-        const tag = isNew ? battletag : editBattletag;
+        const tag = isNew ? selectedTag : editBattletag;
         const regex = /^[^#]+#\d+$/;
         if (
-            (isNew && (!battletag || postTags.length === 0)) ||
+            (isNew && (!selectedTag || postTags.length === 0)) ||
             (!isNew && (!editBattletag || editingPostId.length === 0))
         ) {
             return;
@@ -457,10 +488,22 @@ export default function BoardComponent({ category }) {
         }
         setConfirmMsg(false);
     };
+
+    const handleCommentChange = (postId, value) => {
+        setCommentMap(prev => ({
+            ...prev,
+            [postId]: value
+        }));
+    };
+
+    const handlePostComment = (postId) => {
+        postCommentMutation.mutate({ postId: postId, content: commentMap[postId] })
+
+    }
+
     // useEffect(() => {
     //     console.log('edit', editItem);
     // }, [editItem])
-
     return (
         <>
             <HashtagP>태그를 선택하여 검색하면 관련 게시물을 보여드려요. <br /> ※태그는 최대 5개까지 선택 가능합니다.</HashtagP>
@@ -488,11 +531,12 @@ export default function BoardComponent({ category }) {
             </HashtagList>
             <PostForm>
                 <div>
-                    <input
-                        type="text"
-                        placeholder="배틀태그 입력 예) 홍길동#1234"
-                        value={battletag}
-                        onChange={(e) => { setBattletag(e.target.value) }}
+                    <SelectBattletag
+                        className="select-battletag"
+                        style={{ width: "250px" }}
+                        options={battletagsOption}
+                        selectedTag={selectedTag}
+                        setSelectedTag={setSelectedTag}
                     />
                     <Select
                         options={options}
@@ -567,13 +611,17 @@ export default function BoardComponent({ category }) {
                                                     <p>등록일 : {formattedDate(item.created_at)}</p>
                                                     <p>수정일 : {formattedDate(item.updated_at)}</p>
                                                 </div>
-                                                <div className="date">
-                                                    <button onClick={() => handleEditBoard(item)}>수정</button>
-                                                    <button onClick={() => {
-                                                        handleDeleteConfirm()
-                                                        setPostId(item?.post_id)
-                                                    }}>삭제</button>
-                                                </div>
+                                                {
+                                                    userInfo.id === item?.user_id &&
+                                                    <div className="date">
+                                                        <button onClick={() => handleEditBoard(item)}>수정</button>
+                                                        <button onClick={() => {
+                                                            handleDeleteConfirm()
+                                                            setPostId(item?.post_id)
+                                                        }}>삭제</button>
+                                                    </div>
+                                                }
+
                                             </BoardTitleContainer>
                                             <div className="board-body-container">
                                                 <p className="battletag">{item.battletag}</p>
@@ -601,10 +649,13 @@ export default function BoardComponent({ category }) {
                                                         <p>등록일 : {formattedDate(comment.created_at)}</p>
                                                         <p>수정일 : {formattedDate(comment.updated_at)}</p>
                                                     </div>
-                                                    <div className="date comment">
-                                                        <button>수정</button>
-                                                        <button>삭제</button>
-                                                    </div>
+                                                    {
+                                                        userInfo.id === item?.user_id &&
+                                                        <div className="date comment">
+                                                            <button>수정</button>
+                                                            <button>삭제</button>
+                                                        </div>
+                                                    }
                                                 </BoardTitleContainer>
                                                 <div className="comment-content-container">
                                                     <p>{comment.content}</p>
@@ -615,10 +666,12 @@ export default function BoardComponent({ category }) {
                                     <div className="comment-post-container">
                                         <textarea
                                             placeholder={item.comments?.length > 0 ? "댓글을 작성하세요!" : "댓글의 첫 번째 작성자가 되어보세요!"}
-                                            value={comment}
-                                            onChange={(e) => { setComment(e.target.value) }}
+                                            value={commentMap[item.post_id] || ""}
+                                            onChange={(e) => handleCommentChange(item.post_id, e.target.value)}
                                         />
-                                        <button><FaCommentDots />댓글쓰기</button>
+                                        <button onClick={() => handlePostComment(item.post_id)}>
+                                            <FaCommentDots />댓글쓰기
+                                        </button>
                                     </div>
                                 </BoardCommentContainer>
                             </BoardItem>
