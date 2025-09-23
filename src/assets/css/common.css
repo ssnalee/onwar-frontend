@@ -58,3 +58,18 @@
 .mb__10{
     margin-bottom: 10px;
 }
+.mb__20{
+    margin-bottom: 10px;
+}
+.flex{
+    display: flex;
+    align-items: center;
+}
+
+.gap__5{
+    gap: 5px;
+}
+
+.gap__10{
+    gap: 5px;
+}

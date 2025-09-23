@@ -65,7 +65,6 @@ export default function Login() {
     const mutation = useMutation({
         mutationFn: loginUser,
         onSuccess: (data) => {
-            console.log('data', data);
             if (data.error) {
                 setErr(data.msg || "로그인 실패");
                 return;
@@ -77,7 +76,7 @@ export default function Login() {
             navigate('/');
         },
         onError: (err) => {
-            console.log('err', err);
+            console.error('e', err);
             setErr(err?.response?.data?.msg || "서버 통신 실패");
         },
     });

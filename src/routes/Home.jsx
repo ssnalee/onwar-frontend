@@ -1,30 +1,20 @@
-import { useSelector, useDispatch } from 'react-redux';
-import { increment } from '@/store/counterSlice';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { getHashtagList } from "@/api/apiTag";
 import { TbZzz } from "react-icons/tb";
-import ConfirmModal from '@/components/modal/modalConfirm';
 import styled from 'styled-components';
 import Spinner from '@/components/Spinner';
 import DashboardHeros from '@/components/dashboard/DashboardHeros';
 
 const ButtonWrap = styled.div`
-  /* position: fixed; */
-  /* left: calc(50% + 100px); */
   z-index: 22;
   position: relative;
   height: 600px;
-  /* left: 50%;
-  top: 50%;
-  transform: translate(-50%,-50%); */
   font-family: ${({ theme }) => theme.fontFamily.sub3}, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* width: 600px; */
   button{
     font-family: ${({ theme }) => theme.fontFamily.sub3}, sans-serif;
     background-color: #ffffff;
@@ -41,67 +31,43 @@ const ButtonWrap = styled.div`
 `;
 
 export default function Home() {
-    const count = useSelector((state) => state.counter.value);
-    const [userNo, setUserNo] = useState(1);
-    const [tagNo, setTagNo] = useState(0);
     const [onApi, setOnApi] = useState(false);
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
 
-    // dispatch(setTodos(newTodosArray));
-    // const { data, error, isLoading ,refetch } = useQuery({
-    //     queryKey: ['test'],
-    //     queryFn: getTest
-    // });
-    const { data, error, refetch, isFetching } = useQuery({
-        queryKey: ['tagNo', tagNo],
-        queryFn: () => getHashtagList(tagNo),
+    const { refetch, isFetching } = useQuery({
+        queryKey: ['tagNo'],
+        queryFn: () => getHashtagList(0),
         enabled: false,
     });
-    // const { data, error, isLoading, refetch } = useQuery({
-    //     queryKey: ['test', userNo],
-    //     queryFn: () => getTest(userNo)
-    // });
 
 
-    const [visible, setVisible] = useState(true);
-
-    const handleClose = (key) => {
-        if (key === 1) {
-            alert('확인 눌림');
-        } else {
-            alert('취소 눌림');
-        }
-        setVisible(false);
-    };
     const apiLoadingHandler = () => {
         refetch();
-        sessionStorage.setItem("onApi", "true");
+        const expireTime = Date.now() + 10 * 60 * 1000; 
+        sessionStorage.setItem("onApiExpire", expireTime.toString());
         setOnApi(true);
-        setTimeout(() => {
-            sessionStorage.setItem("onApi", "false");
-            setOnApi(false);
-          }, 10 * 60 * 1000);
     }
 
     useEffect(() => {
-        const storedApi = sessionStorage.getItem("onApi") === "true";
-        setOnApi(storedApi);
+        const expireTime = sessionStorage.getItem("onApiExpire");
+        if (expireTime) {
+            const now = Date.now();
+            if (now < Number(expireTime)) {
+              setOnApi(true);
+        
+              const timeout = setTimeout(() => {
+                sessionStorage.removeItem("onApiExpire");
+                setOnApi(false);
+              }, Number(expireTime) - now);
+        
+              return () => clearTimeout(timeout);
+            } else {
+              sessionStorage.removeItem("onApiExpire");
+              setOnApi(false);
+            }
+          }
     }, [])
     return (
         <>
-            {/* <button onClick={() => dispatch(increment())}>+</button>
-            <button onClick={()=> setUserNo(prev=>prev+1)}>data</button> */}
-            <p>{ }</p>
-
-            {/* <ConfirmModal
-                isVisible={visible}
-                title="정말 삭제하시겠습니까?"
-                content="삭제하면 되돌릴 수 없습니다."
-                onCloseDialogHandler={handleClose}
-            /> */}
-
-
             {isFetching ?
                 (
                     <Spinner loadingText={"서버 깨우는 중"} isFixed={true} style={{ left: "calc(50% + 100px)", fontFamily: "Jua, sans-serif", top: "45%" }} />

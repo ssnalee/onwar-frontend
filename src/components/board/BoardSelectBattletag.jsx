@@ -88,7 +88,7 @@ const Dropdown = styled.div`
     padding: 0 0 5px 0;
     border-radius: 5px;
     p{
-        margin-top: 0;
+        margin-top: 0 !important;
         padding: 13px 8px 8px 8px;
         color: #0093ff;
     }

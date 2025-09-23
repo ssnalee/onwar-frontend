@@ -14,7 +14,6 @@ export const getBattletagList = async () => {
         method: 'get',
         url: '/battletags/list',
     });
-    // console.log('res',response);
     // return response;
 }
 

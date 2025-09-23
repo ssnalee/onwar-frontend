@@ -2,8 +2,9 @@ import styled from "styled-components";
 import Select from 'react-select';
 import AlertModal from '@/components/modal/modalAlert';
 import ConfirmModal from '@/components/modal/modalConfirm';
+import SelectBattletag from "./BoardSelectBattletag";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { TiDelete } from "react-icons/ti";
 import { getBattletagList, getHashtagList } from "@/api/apiTag";
 import { hashtagColor } from "@/utils/hashtag";
@@ -11,19 +12,8 @@ import { FaUndo } from "react-icons/fa";
 import { deleteBoard, deleteBoardComment, getBoardList, postBoard, postBoardComment } from "@/api/apiPost";
 import { formattedDate } from "@/utils/utils";
 import { FaCommentDots } from "react-icons/fa6";
-import SelectBattletag from "./BoardSelectBattletag";
 import { useSelector } from "react-redux";
 
-
-// const Title = styled.h3`
-//    margin: 50px 0;
-//    display: flex;
-//    align-items: center;
-//    gap: 5px;
-//    font-size: 12p5;
-//    color:#616161;
-//    /* font-weight: 400; */
-// `;
 const HashtagList = styled.ul`
   list-style: none;
   display: flex;
@@ -32,8 +22,6 @@ const HashtagList = styled.ul`
   flex-wrap: wrap;
   gap: 5px;
   margin-bottom: 25px;
-  /* border: 1px solid #cccccc;
-  background-color: #fff; */
   border-radius: 10px;
   max-width: 1200px;
   margin: 0 auto 25px;
@@ -149,6 +137,7 @@ const PostForm = styled.form`
     }
     
 `;
+
 const BoardList = styled.ul``;
 const BoardItem = styled.li`
     /* padding: 30px; */
@@ -163,6 +152,7 @@ const BoardPostContainer = styled.div`
     .board-body-container{
         position: relative;
         >div{
+            position: relative;
             span{
                 margin-right: 5px;
                 color:#206eff;
@@ -174,14 +164,22 @@ const BoardPostContainer = styled.div`
             bottom: 0;
         }
         .battletag{
-            margin-bottom: 20px;
             background-color: #000;
             width: fit-content;
             color:#fff;
             padding: 5px;
             border-radius: 5px;
+            cursor: pointer;
         }
     }
+`;
+
+const CopyWrap = styled.p`
+    background-color: #01e6da;
+    color:#fff;
+    padding: 3px 7px;
+    border-radius: 20px;
+    width: fit-content;
 `;
 const BoardCommentContainer = styled.div`
     /* padding: 30px; */
@@ -259,37 +257,33 @@ const BoardTitleContainer = styled.div`
     }
 `;
 
-// const CommentOptions = styled.div``;
-
-// const EditingForm = styled.form`
-
-// `;
-
 export default function BoardComponent({ category }) {
     const queryClient = useQueryClient();
     const userInfo = useSelector((state) => state.user.userInfo);
 
+    const [selectedTag, setSelectedTag] = useState("");
+    const [editBattletag, setEditBattletag] = useState("");
+    const [editComment, setEditComment] = useState("");
+
     const [err, setErr] = useState(null);
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const [editingPostId, setEditingPostId] = useState(null);
+    const [postId, setPostId] = useState(null);
+
     const [confirmMsg, setConfirmMsg] = useState(false);
-    const [tagNo, setTagNo] = useState(0);
+
+    const [isCopy, setIsCopy] = useState({});
+    const [commentMap, setCommentMap] = useState({});
+    const [commentOpenMap, setCommentOpenMap] = useState({});
     const [tagItems, setTagItems] = useState([]);
     const [searchItems, setSearchItems] = useState([]);
     const [postTags, setPostTags] = useState([]);
-    const [selectedTag, setSelectedTag] = useState("");
-    const [comment, setComment] = useState("");
-    const [commentMap, setCommentMap] = useState({});
-    const [editingPostId, setEditingPostId] = useState(null);
-    const [editBattletag, setEditBattletag] = useState("");
     const [editPostTags, setEditPostTags] = useState([]);
-    const [editComment, setEditComment] = useState("");
-    const [editItem, setEditItem] = useState("");
-    const [postId, setPostId] = useState(null);
-    // const [category, setCategory] = useState(1);
-    const [commentOpenMap, setCommentOpenMap] = useState({});
-    const isLoggedIn = useMemo(() => {
-        return !!(userInfo && Object.keys(userInfo).length > 0);
-    }, [userInfo])
-    const { data, error } = useQuery({
+
+    const isOptionDisabled = (option) =>
+    postTags.length >= 5 && !postTags.includes(option.value);
+
+    const { data } = useQuery({
         queryKey: ['tagNo'],
         queryFn: () => getHashtagList(0)
     });
@@ -299,11 +293,34 @@ export default function BoardComponent({ category }) {
         queryFn: () => getBoardList(category)
     });
 
+    const isLoggedIn = useMemo(() => {
+        return !!(userInfo && Object.keys(userInfo).length > 0);
+    }, [userInfo])
+
     const { data: battletagList } = useQuery({
         queryKey: ['battletagList'],
         queryFn: () => getBattletagList(),
         enabled: isLoggedIn,
     });
+    
+
+    const options = useMemo(() => {
+        if (!data?.data) return [];
+        return data.data.map(item => ({
+            value: item.id,
+            label: item.tag
+        }))
+    }, [data]);
+
+    const coloredData = useMemo(() => {
+        if (!data?.data) return [];
+        return data.data
+            .filter(item => !tagItems.some(selected => selected.id === item.id))
+            .map(item => ({
+                ...item,
+                color: hashtagColor[item.id] || "#000"
+            }));
+    }, [data, tagItems]);
 
     const battletagsOption = useMemo(() => {
         if (!battletagList?.data) return [];
@@ -311,10 +328,7 @@ export default function BoardComponent({ category }) {
             value: item.id,
             label: item.battletag,
         }));
-    }, [battletagList])
-
-    const isOptionDisabled = (option) =>
-        postTags.length >= 5 && !postTags.includes(option.value);
+    }, [battletagList]);
 
     const filterdBoardData = useMemo(() => {
         if (!boardData?.data) return [];
@@ -322,8 +336,6 @@ export default function BoardComponent({ category }) {
             if (!Array.isArray(item.hashtags)) return false;
             if (searchItems.length === 0) return true;
             const hashtagsSet = new Set(item.hashtags);
-            console.log('item.hashtags', item.hashtags);
-            console.log('hashtagsSet', hashtagsSet);
             return searchItems.every(s => hashtagsSet.has(s.tag));
         });
     }, [boardData, searchItems]);
@@ -363,7 +375,16 @@ export default function BoardComponent({ category }) {
         onSuccess: (data) => {
             queryClient.invalidateQueries(['category']);
             setErr(null);
-            setCommentMap(prev => ({ ...prev, [postId] : ""}));
+            setCommentMap(prev => ({ ...prev, [postId]: "" }));
+            setCommentOpenMap(prev => ({
+                ...prev,
+                [postId]: true
+            }));
+            if(editComment){
+                setEditComment(null);
+                setEditingCommentId(null);
+            }
+            
         },
         onError: (err) => {
             setErr(err?.response?.data?.msg || "댓글 저장 중 오류가 발생했습니다.");
@@ -379,34 +400,22 @@ export default function BoardComponent({ category }) {
             setErr(err?.response?.data?.msg || "댓글 삭제 중 오류가 발생했습니다.");
         },
     });
+
+    /**
+     * 전체 댓글 활성화/ 비활성화
+     * @param {number} postId 
+     */
     const toggleComment = (postId) => {
         setCommentOpenMap(prev => ({
             ...prev,
             [postId]: !prev[postId]
         }));
     };
-    useEffect(() => {
-        console.log('postTags', postTags);
-    }, [postTags])
 
-    const options = useMemo(() => {
-        if (!data?.data) return [];
-        return data.data.map(item => ({
-            value: item.id,
-            label: item.tag
-        }))
-    }, [data]);
-
-    const coloredData = useMemo(() => {
-        if (!data?.data) return [];
-        return data.data
-            .filter(item => !tagItems.some(selected => selected.id === item.id))
-            .map(item => ({
-                ...item,
-                color: hashtagColor[item.id] || "#000"
-            }));
-    }, [data, tagItems]);
-
+    /**
+     * 검색에 사용할 해시태그를 추가
+     * @param {object} item - 사용할 해시태그 객체 { id: 2, tag: '매너', color: '#7B68EE' }
+     */
     const handleClickHashtag = (item) => {
         setTagItems(prevItems => {
             if (prevItems.length >= 5) {
@@ -418,10 +427,19 @@ export default function BoardComponent({ category }) {
         });
     }
 
+    /**
+     * 검색에 사용된 해시태그를 삭제
+     * @param {number} id - 삭제할 해시태그 ID
+     */
     const handleDelete = (id) => {
         setTagItems(prevItems => prevItems.filter(item => item.id !== id));
     }
 
+    /**
+     * 게시글 등록시 선택한 해시태그 리스트 추가
+     * @param {Object[]} selected  - [{value: 6, label: '20세 ↑'}]
+     * @returns 
+     */
     const handleSelectChange = (selected) => {
         if (!selected) return;
         const selectedArray = Array.isArray(selected) ? selected : [selected];
@@ -432,11 +450,9 @@ export default function BoardComponent({ category }) {
         setPostTags(ids);
     }
 
-    const handleSearch = () => {
-        setSearchItems(tagItems);
-        console.log('tag', tagItems);
-    }
-
+    /**
+     * 게시글 등록 또는 수정
+     */
     const handlePostBoard = () => {
         if (!isLoggedIn) {
             setErr("로그인 후 이용가능합니다.");
@@ -468,6 +484,10 @@ export default function BoardComponent({ category }) {
         postMutation.mutate(params);
     }
 
+    /**
+     * 해당 게시글 수정모드로 전환
+     * @param {object} item - 해당 게시글 데이터 전체 
+     */
     const handleEditBoard = (item) => {
         setEditBattletag(item.battletag);
         setEditingPostId(item.post_id);
@@ -478,10 +498,10 @@ export default function BoardComponent({ category }) {
         setEditPostTags(tags);
     }
 
-    const handleDeleteConfirm = () => {
-        setConfirmMsg(true);
-    }
-
+    /**
+     * 게시글 삭제시 컨펌모달창 확인,취소
+     * @param {number} key 
+     */
     const handleClose = (key) => {
         if (key === 1) {
             deleteMutation.mutate(postId);
@@ -489,6 +509,11 @@ export default function BoardComponent({ category }) {
         setConfirmMsg(false);
     };
 
+    /**
+     * 게시글 댓글 입력시 onChange 타고 댓글 state에 저장
+     * @param {number} postId - 게시글 ID
+     * @param {string} value - 게시글 작성한 댓글 내용
+     */
     const handleCommentChange = (postId, value) => {
         setCommentMap(prev => ({
             ...prev,
@@ -496,14 +521,65 @@ export default function BoardComponent({ category }) {
         }));
     };
 
-    const handlePostComment = (postId) => {
-        postCommentMutation.mutate({ postId: postId, content: commentMap[postId] })
+    /**
+     * 댓글 작성 또는 수정
+     * @param {number | null} postId - 게시글 ID (댓글 작성 필요)
+     * @param {number | null} commentId - 댓글 ID (댓글 수정 필요)
+     */
+    const handlePostComment = (postId, commentId = null) => {
+        const content = commentId ? editComment : commentMap[postId];
+        setPostId(postId);
+        postCommentMutation.mutate({
+            data: { post_id: postId, comment_id: commentId, content },
+            method: commentId ? "PATCH" : "POST"
+        });
+    };
 
+    /**
+     * 배틀태그 클릭 시 클립보드에 저장
+     * @param {number} postId 
+     * @param {string} str 
+     */
+    const copyBattletag = async (postId, str) => {
+        try {
+            await navigator.clipboard.writeText(str);
+            setIsCopy(prev => {
+                const newState = {};
+                Object.keys(prev).forEach(key => {
+                    newState[key] = false;
+                });
+                newState[postId] = true;
+                return newState;
+            });
+
+            setTimeout(() => {
+                setIsCopy(prev => ({
+                    ...prev,
+                    [postId]: false,
+                }));
+            }, 2000);
+
+        } catch (err) {
+            console.error("복사 실패", err);
+        }
     }
 
-    // useEffect(() => {
-    //     console.log('edit', editItem);
-    // }, [editItem])
+    /**
+     * 댓글 수정폼 활성화/비활성화 전환
+     * @param {number} commentId 
+     * @param {boolean} isEditing 
+     * @param {string} content 
+     */
+    const commentStateChange = (commentId, isEditing, content) => {
+        if (isEditing) {
+            setEditingCommentId(commentId);
+            setEditComment(content);
+        } else {
+            setEditingCommentId(null);
+            setEditComment("");
+        }
+    };
+
     return (
         <>
             <HashtagP>태그를 선택하여 검색하면 관련 게시물을 보여드려요. <br /> ※태그는 최대 5개까지 선택 가능합니다.</HashtagP>
@@ -516,7 +592,7 @@ export default function BoardComponent({ category }) {
                         <TiDelete onClick={() => handleDelete(item.id)} />
                     </div>
                 ))}
-                <button onClick={handleSearch}>검색</button>
+                <button onClick={()=>setSearchItems(tagItems)}>검색</button>
             </HashtagSearch>
             <HashtagList>
                 <li onClick={() => { setTagItems([]) }}><FaUndo /></li>
@@ -612,11 +688,11 @@ export default function BoardComponent({ category }) {
                                                     <p>수정일 : {formattedDate(item.updated_at)}</p>
                                                 </div>
                                                 {
-                                                    userInfo.id === item?.user_id &&
+                                                    userInfo?.id === item?.user_id &&
                                                     <div className="date">
                                                         <button onClick={() => handleEditBoard(item)}>수정</button>
                                                         <button onClick={() => {
-                                                            handleDeleteConfirm()
+                                                            setConfirmMsg(true);
                                                             setPostId(item?.post_id)
                                                         }}>삭제</button>
                                                     </div>
@@ -624,7 +700,14 @@ export default function BoardComponent({ category }) {
 
                                             </BoardTitleContainer>
                                             <div className="board-body-container">
-                                                <p className="battletag">{item.battletag}</p>
+                                                <div className="flex mb__20 gap__10">
+                                                    <p className="battletag" onClick={() => copyBattletag(item.post_id, item.battletag)}>{item.battletag}</p>
+                                                    {
+                                                        isCopy[item.post_id] &&
+                                                        <CopyWrap className="ft__7">복사 완료!</CopyWrap>
+                                                    }
+                                                </div>
+
                                                 <div className="hashtag-list-container">
                                                     {
                                                         item.hashtags && item.hashtags.map((tag) => (
@@ -650,22 +733,39 @@ export default function BoardComponent({ category }) {
                                                         <p>수정일 : {formattedDate(comment.updated_at)}</p>
                                                     </div>
                                                     {
-                                                        userInfo.id === item?.user_id &&
+                                                        userInfo?.username === comment?.username &&
                                                         <div className="date comment">
-                                                            <button>수정</button>
-                                                            <button>삭제</button>
+                                                            {
+                                                               editingCommentId === comment.id 
+                                                                    ? (
+                                                                        <>
+                                                                            <button onClick={() => commentStateChange(comment.id, false, comment.content)}>취소</button>
+                                                                            <button onClick={() => handlePostComment(item.post_id, comment.id)}>수정 완료</button>
+                                                                        </>
+                                                                    )
+                                                                    : <button onClick={() => commentStateChange(comment.id, true, comment.content)}>수정</button>
+                                                            }
+                                                            <button onClick={()=>deleteCommentMutation.mutate(comment.id)}>삭제</button>
                                                         </div>
                                                     }
                                                 </BoardTitleContainer>
-                                                <div className="comment-content-container">
-                                                    <p>{comment.content}</p>
-                                                </div>
+                                                {
+                                                    editingCommentId === comment.id?
+                                                        <div>
+                                                            <textarea value={editComment} onChange={(e) => setEditComment(e.target.value)} />
+                                                        </div>
+                                                        :
+                                                        <div className="comment-content-container">
+                                                            <p>{comment.content}</p>
+                                                        </div>
+                                                }
+
                                             </div>
                                         ))
                                     }
                                     <div className="comment-post-container">
                                         <textarea
-                                            placeholder={item.comments?.length > 0 ? "댓글을 작성하세요!" : "댓글의 첫 번째 작성자가 되어보세요!"}
+                                            placeholder={!userInfo ? "로그인 후 댓글을 달아주세요!" : item.comments?.length > 0 ? "댓글을 작성하세요!" : "첫댓글의  번째 작성자가 되어보세요!"}
                                             value={commentMap[item.post_id] || ""}
                                             onChange={(e) => handleCommentChange(item.post_id, e.target.value)}
                                         />
@@ -696,6 +796,7 @@ export default function BoardComponent({ category }) {
                     onCloseDialogHandler={handleClose}
                 />
             }
+
         </>
     )
 }

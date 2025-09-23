@@ -1,7 +1,6 @@
 import { apiRequest } from "./api";
 
 export const getBoardList = async (params) => {
-    console.log(params);
     return apiRequest({
         method: 'GET',
         url: `/board/posts`,
@@ -10,7 +9,6 @@ export const getBoardList = async (params) => {
 }
 
 export const postBoard = async (options) => {
-    console.log('options',options);
     return apiRequest({
         method: options.method === 'POST' ? 'POST' : 'PATCH',
         url: '/board/post',

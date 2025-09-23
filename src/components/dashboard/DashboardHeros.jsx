@@ -1,7 +1,7 @@
 import { getHeros } from "@/api/apiOw";
 import { heros } from "@/utils/heros";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import styled from "styled-components";
 import DashboardSkillPopup from "./DashboardSkillPopup";
 
@@ -62,17 +62,12 @@ export default function DashboardHeros() {
         setSelectedHeros(item)
         setIsVisible(true);
     }
-    useEffect(() => {
-        if (herosArr) {
-            console.log('herosArr changed', herosArr);
-        }
-    }, [herosArr]);
     return (
         <>
             <HeroArea>
                 {herosArr.map(item => (
-                    <li style={{ backgroundColor: item.color }} onClick={()=>{openSkillPopup(item)}}>
-                        <img src={item.portrait} />
+                    <li key={item.name} style={{ backgroundColor: item.color }} onClick={()=>{openSkillPopup(item)}} >
+                        <img src={item.portrait} alt={item.name} />
                         <p>{item.name}</p>
                     </li>
                 ))}

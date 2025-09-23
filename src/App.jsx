@@ -18,6 +18,7 @@ import QuickPlay from './routes/board/BoardQuickPlay';
 import { setUserInfo } from './store/userSlice';
 import { useEffect } from 'react';
 import { isTokenValid } from './utils/utils';
+import Error from './routes/Error';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -65,13 +66,12 @@ function App() {
       localStorage.clear();
       dispatch(setUserInfo(null));
     }
-  }, []);
+  }, [token,userInfo,dispatch]);
   useEffect(() => {
     if(error?.status === 401 || error?.status === 403) {
-      console.log('탔다')
       navigate('/login');
     }
-  }, [error]);
+  }, [error,navigate]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -84,6 +84,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />}></Route>
               <Route path="/login" element={<Login />}></Route>
+              <Route path="/error" element={<Error />}></Route>
               <Route path="/sign-up" element={<Signup />}></Route>
               <Route path="/search" element={<SearchUser />}></Route>
               <Route path="/battletag" element={<BattleTags />}></Route>

@@ -40,8 +40,7 @@ API.interceptors.response.use(
     (resposne) => resposne,
     (error) => {
       const isNotLoginPage = window.location.pathname !== '/login';
-      if(isNotLoginPage && error.response.status === 401 || error.response.data?.msg === '토큰이 유효하지 않습니다.'){
-        console.log('dddddd');
+      if(isNotLoginPage && (error.response.status === 401 || error.response.data?.msg === '토큰이 유효하지 않습니다.')){
         store.dispatch(setError({status : error.response.status, msg : error.response.data?.msg}));
       }
       if (error.response) {

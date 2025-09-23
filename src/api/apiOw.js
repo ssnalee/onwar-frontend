@@ -12,7 +12,6 @@ const OW_URL = "https://ow-api.com";
 export const getProfile = async (data) => {
     //platform : pc || etc
     const formattedBattletag = encodeURIComponent(data.battletag.replace(/#/g, "-"));
-    // console.log('formattedBattletag',formattedBattletag);
     const response = await axios.get(`${OW_URL}/v1/stats/${data.platform}/${data.region}/${formattedBattletag}/heroes/ana`);
     return response.data;
 }
@@ -21,7 +20,6 @@ export const getProfile = async (data) => {
 export const getFastProfile = async (data) => {
     //platform : pc || etc
     const formattedBattletag = encodeURIComponent(data.battletag.replace(/#/g, "-"));
-    // console.log('formattedBattletag',formattedBattletag);
     const response = await axios.get(`${BASE_URL}/players/${formattedBattletag}/stats/summary?gamemode=competitive`);
     return response.data;
     // 

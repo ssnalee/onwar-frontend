@@ -67,7 +67,6 @@ export default function Signup() {
     const signUpMutation = useMutation({
         mutationFn : signUpUser,
         onSuccess: (data) => {
-            console.log('data',data);
             if (data.error) {
                 setErr(data.msg || "회원가입 실패");
                 return;

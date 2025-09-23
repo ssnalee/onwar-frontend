@@ -17,7 +17,7 @@ const userSlice = createSlice({
         },
         setError : (state, action) => {
           state.error = action.payload;
-          console.log('state.errorStatus',state.error);
+          console.error('에러 발생 : ',state.error);
       }
     },
     // extraReducers: (builder) => {
@@ -48,7 +48,6 @@ export const loginUser = createAsyncThunk(
     }
   }
 );
-// 사용법
 //  await dispatch(loginUser({ userId, userPw })).unwrap();
 
 export const { setUserInfo, setError} = userSlice.actions;

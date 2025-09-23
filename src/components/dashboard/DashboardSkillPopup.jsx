@@ -3,7 +3,6 @@ import ModalFrame from "../modal/modalFrame";
 import Spinner from "@/components/Spinner"
 import { getHerosIntroduction } from "@/api/apiOw";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { FaExclamationCircle } from "react-icons/fa";
 
@@ -99,14 +98,11 @@ const HerosSkill = styled.ul`
 `;
 
 export default function DashboardSkillPopup({ isVisible, heros, onCloseDialogHandler }) {
-    const { data, isLoading } = useQuery({
+    const { data, isLoading  } = useQuery({
         queryKey: ['heros', heros],
         queryFn: () => getHerosIntroduction(heros?.key),
+        enabled: !!heros,
     })
-
-    useEffect(() => {
-        console.log(data);
-    }, [data])
 
     const closeHandler = () => {
         onCloseDialogHandler?.();
