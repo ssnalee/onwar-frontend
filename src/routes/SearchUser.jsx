@@ -6,6 +6,7 @@ import { FiCheck } from "react-icons/fi";
 import styled from "styled-components";
 import { heros } from "../utils/heros";
 import { useSearchParams } from "react-router-dom";
+import Spinner from "@/components/Spinner";
 const SearchWrap = styled.div`
    margin-top: 50px;
    display: flex;
@@ -404,13 +405,14 @@ export default function SearchUser() {
                 </> :
                 isLoading ?
                     <>
-                        <Nodata>로딩 중입니다<span></span></Nodata>
+                         <Spinner isFixed={true} />
                     </>
                     :
                     <>
                         <Nodata>
-                            <p>데이터가 없습니다.</p>
-                            <p>플레이어 이름의 대소문자와 배틀태그를 정확히 입력해야 합니다.</p>
+                            <p className="mb__5">데이터가 없습니다.</p>
+                            <p className="mb__5">플레이어 이름의 대소문자와 배틀태그를 정확히 입력해야 합니다.</p>
+                            <p className="mb__5">프로필 전체 공개인지 확인해주세요.</p>
                         </Nodata>
                     </>
             }

@@ -91,7 +91,7 @@ export default function Login() {
     }, []);
     const handleLogin = () => {
         if (!userId || !userPw) {
-            setErr("입력해야함");
+            setErr("아이디와 비밀번호를 입력해주세요.");
             return;
         }
         const userData = {
