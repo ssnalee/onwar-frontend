@@ -240,11 +240,11 @@ export default function SearchUser() {
     const [region, setRegion] = useState("asia");
     const [battletag, setBattletag] = useState("MERCY76#3111");
     const [searchTag, setSearchTag] = useState("");
-    const { data, error, isLoading, refetch } = useQuery({
+    const { data, isLoading, refetch } = useQuery({
         queryKey: ['battletag', battletag],
         queryFn: () => getProfile({ platform, region, battletag })
     });
-    const { data : careerData , error : careerError, isLoading : careerIsLoading, refetch : careerRefetch } = useQuery({
+    const { data : careerData, refetch : careerRefetch } = useQuery({
         queryKey: ['careerProfile', battletag],
         queryFn: () => getFastProfile({ platform, region, battletag })
     });
@@ -328,7 +328,7 @@ export default function SearchUser() {
                 <>
                     <BattleTagWrap>
                         <div className="player-wrap">
-                            <img className="player-ico" src={data?.icon} />
+                            <img className="player-ico" src={data?.icon} alt="플레이어 아이콘" />
                             <p>{data?.name}</p>
                         </div>
                         <TierWrap className="tier-wrap">
@@ -343,7 +343,7 @@ export default function SearchUser() {
                                             <div className="tier">
                                                 {matchedRating ?
                                                     <div className="img-wrap">
-                                                        <img className={`${matchedRating?.group} rank-ico`} src={matchedRating?.rankIcon} />
+                                                        <img className={`${matchedRating?.group} rank-ico`} src={matchedRating?.rankIcon} alt={`${matchedRating?.group} ${matchedRating?.tier}`} />
                                                         <img className="div-ico" src={matchedRating?.divisionIcon} alt={`${matchedRating?.group} ${matchedRating?.tier}`} />
                                                     </div> :
                                                     <div className="no-tier">-</div>

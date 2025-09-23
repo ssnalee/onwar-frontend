@@ -41,11 +41,11 @@ export default function Header() {
         if (userInfo === "") {
             navigate('/login');
         }
-    }, [userInfo]);
+    }, [userInfo,navigate]);
     return (
         <Head>
             <h1 onClick={()=>navigate('/')}>
-                <img src="/images/heros/default.svg" />
+                <img src="/images/heros/default.svg" alt="오버워치 이미지" />
                 ON WAR</h1>
             <Nav>
                 {userInfo ? (

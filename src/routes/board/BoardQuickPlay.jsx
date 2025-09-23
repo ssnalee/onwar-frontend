@@ -1,4 +1,4 @@
-import BoardComponent from "@/components/board/BoardComponent";
+import BoardComponent from "@/components/board/Board";
 
 
 export default function QuickPlay() {
